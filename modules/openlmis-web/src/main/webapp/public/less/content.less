@@ -403,6 +403,23 @@ span[class^="tpl-"] {
     border-top-color: #887f7f;
   }
 }
+
+.header-fixed {
+   position: fixed;
+   top: 0px;
+   overflow: hidden;
+   table {
+     padding: 0px;
+     margin: 0px;
+   }
+   th {
+     background: rgba(0,0,0,0.68);
+     color: white;
+     text-shadow: none;
+     border-radius: 0 !important;
+   }
+}
+
 table .productCategory,
 .productCategory {
   background-color: #45a7ad;
@@ -1253,18 +1270,17 @@ td .close {
 }
 
 .loader-icon {
-    display:    none;
-    position:   fixed;
-    z-index:    1000;
-    top:        0;
-    left:       0;
-    height:     100%;
-    width:      100%;
-    background: transparent
-    url('../images/loader.gif')
-    50% 50%
-    no-repeat;
-}
+     position:   fixed;
+     z-index:    1000;
+     top:        0;
+     left:       0;
+     height:     100%;
+     width:      100%;
+     background: transparent
+     url('../images/loader.gif')
+     50% 50%
+     no-repeat;
+ }
 .view-req-form {
   padding: 10px 15px;
   .row-fluid {
