@@ -5,25 +5,155 @@
  */
 
 var rnrModule = angular.module('rnr', ['openlmis', 'ngGrid', 'ui.bootstrap.modal', 'ui.bootstrap.dropdownToggle', 'ui.bootstrap.dialog']).config(['$routeProvider', function ($routeProvider) {
-  $routeProvider.
-    when('/init-rnr', {controller:InitiateRnrController, templateUrl:'partials/create/init.html', resolve: InitiateRnrController.resolve}).
-    when('/create-rnr/:rnr/:facility/:program', {controller:CreateRequisitionController, templateUrl:'partials/create/index.html', resolve:CreateRequisitionController.resolve, reloadOnSearch:false}).
-    when('/rnr-for-approval', {controller:ApproveRnrListController, templateUrl:'partials/approve/list-for-approval.html', resolve:ApproveRnrListController.resolve}).
-    when('/requisitions-for-convert-to-order', {controller:ConvertToOrderListController, templateUrl:'partials/convert-to-order-list.html', resolve:ConvertToOrderListController.resolve}).
-    when('/view-requisitions', {controller:ViewRnrListController, templateUrl:'partials/view/index.html', resolve:ViewRnrListController.resolve}).
-    when('/rnr-for-approval/:rnr/:program', {controller:ApproveRnrController, templateUrl:'partials/approve/approve.html', resolve:ApproveRnrController.resolve, reloadOnSearch:false}).
-    when('/requisition/:rnr/:program', {controller:ViewRnrController, templateUrl:'partials/view/view.html', resolve: ViewRnrController.resolve, reloadOnSearch:false}).
-    otherwise({redirectTo:'/init-rnr'});
-}]).directive('rnrValidator',function () {
+    $routeProvider.
+      when('/init-rnr', {controller: InitiateRnrController, templateUrl: 'partials/create/init.html', resolve: InitiateRnrController.resolve}).
+      when('/create-rnr/:rnr/:facility/:program', {controller: CreateRequisitionController, templateUrl: 'partials/create/index.html', resolve: CreateRequisitionController.resolve, reloadOnSearch: false}).
+      when('/rnr-for-approval', {controller: ApproveRnrListController, templateUrl: 'partials/approve/list-for-approval.html', resolve: ApproveRnrListController.resolve}).
+      when('/requisitions-for-convert-to-order', {controller: ConvertToOrderListController, templateUrl: 'partials/convert-to-order-list.html', resolve: ConvertToOrderListController.resolve}).
+      when('/view-requisitions', {controller: ViewRnrListController, templateUrl: 'partials/view/index.html', resolve: ViewRnrListController.resolve}).
+      when('/rnr-for-approval/:rnr/:program', {controller: ApproveRnrController, templateUrl: 'partials/approve/approve.html', resolve: ApproveRnrController.resolve, reloadOnSearch: false}).
+      when('/requisition/:rnr/:program', {controller: ViewRnrController, templateUrl: 'partials/view/view.html', resolve: ViewRnrController.resolve, reloadOnSearch: false}).
+      otherwise({redirectTo: '/init-rnr'});
+  }]).directive('rnrValidator',function () {
     return {
-      require:'?ngModel',
-      link:function (scope, element, attrs, ctrl) {
+      require: '?ngModel',
+      link: function (scope, element, attrs, ctrl) {
         rnrModule[attrs.rnrValidator](element, ctrl, scope);
       }
     };
   }).run(function ($rootScope) {
     $rootScope.pageSize = 20;
   });
+
+rnrModule.factory('RequisitionService', ["$rootScope", "$q", function ($rootScope) {
+
+  var data = {};
+
+  var promises = [];
+
+  var initialized = false;
+
+  var initializeService = function ($q, $timeout, $route, Requisitions, ProgramRnRColumnList, LossesAndAdjustmentsReferenceData, FacilityApprovedProducts, FacilityProgramRights, ProgramRegimenTemplate, ReferenceData) {
+    promises.push(dataGetter.requisition($q, $timeout, Requisitions, $route, $rootScope));
+    promises.push(dataGetter.currency($q, $timeout, ReferenceData))
+    promises.push(dataGetter.rnrColumns($q, $timeout, ProgramRnRColumnList, $route));
+    promises.push(dataGetter.lossesAndAdjustmentsTypes($q, $timeout, LossesAndAdjustmentsReferenceData));
+    promises.push(dataGetter.facilityApprovedProducts($q, $timeout, $route, FacilityApprovedProducts));
+    promises.push(dataGetter.requisitionRights($q, $timeout, $route, FacilityProgramRights));
+    promises.push(dataGetter.regimenTemplate($q, $timeout, $route, ProgramRegimenTemplate));
+
+    $q.all(promises).then(function () {
+      initialized = true;
+      $rootScope.$broadcast('rnrInitialized', data);
+    });
+  }
+
+  var dataGetter = {
+
+    requisition: function ($q, $timeout, Requisitions, $route, $rootScope) {
+      var deferred = $q.defer();
+      $timeout(function () {
+        var rnr = data.requisition;
+        if (rnr) {
+          deferred.resolve(rnr);
+          return;
+        }
+        Requisitions.get({id: $route.current.params.rnr}, function (response) {
+          data.requisition = response.rnr;
+          deferred.resolve(response.rnr);
+        }, {});
+      }, 100);
+      return deferred.promise;
+    },
+
+    rnrColumns: function ($q, $timeout, ProgramRnRColumnList, $route) {
+      var deferred = $q.defer();
+      $timeout(function () {
+        ProgramRnRColumnList.get({programId: $route.current.params.program}, function (response) {
+          data.rnrColumnList = response.rnrColumnList;
+          deferred.resolve(data.rnrColumnList);
+        }, {});
+      }, 100);
+      return deferred.promise;
+    },
+
+    currency: function ($q, $timeout, ReferenceData) {
+      var deferred = $q.defer();
+      $timeout(function () {
+        ReferenceData.get({}, function (response) {
+          data.currency = response.currency;
+          deferred.resolve(data.currency);
+        }, {});
+      }, 100);
+      return deferred.promise;
+    },
+
+    lossesAndAdjustmentsTypes: function ($q, $timeout, LossesAndAdjustmentsReferenceData) {
+      var deferred = $q.defer();
+      $timeout(function () {
+        LossesAndAdjustmentsReferenceData.get({}, function (response) {
+          data.lossAdjustmentTypes = response.lossAdjustmentTypes;
+          deferred.resolve(data.lossAdjustmentTypes);
+        }, {});
+      }, 100);
+      return deferred.promise;
+    },
+
+    facilityApprovedProducts: function ($q, $timeout, $route, FacilityApprovedProducts) {
+      var deferred = $q.defer();
+      $timeout(function () {
+        FacilityApprovedProducts.get({facilityId: $route.current.params.facility, programId: $route.current.params.program}, function (response) {
+          data.nonFullSupplyProducts = response.nonFullSupplyProducts;
+          deferred.resolve(data.nonFullSupplyProducts);
+        }, {});
+      }, 100);
+      return deferred.promise;
+    },
+
+    requisitionRights: function ($q, $timeout, $route, FacilityProgramRights) {
+      var deferred = $q.defer();
+      $timeout(function () {
+        FacilityProgramRights.get({facilityId: $route.current.params.facility, programId: $route.current.params.program}, function (response) {
+          data.requisitionRights = response.rights;
+          deferred.resolve(data.requisitionRights);
+        }, {});
+      }, 100);
+      return deferred.promise;
+    },
+
+    regimenTemplate: function ($q, $timeout, $route, ProgramRegimenTemplate) {
+      var deferred = $q.defer();
+      $timeout(function () {
+        ProgramRegimenTemplate.get({programId: $route.current.params.program}, function (response) {
+          data.regimenTemplate = response.template;
+          deferred.resolve(data.regimenTemplate);
+        }, {});
+      }, 100);
+      return deferred.promise;
+    }
+
+  };
+
+  return {
+
+    data: data,
+
+    init: initializeService,
+
+    getData: function (key) {
+      if (initialized) {
+        return data[key];
+      }
+      return undefined;
+    },
+
+    saveRnr: function (rnr) {
+
+    }
+
+  }
+
+}]);
 
 rnrModule.positiveInteger = function (element, ctrl, scope) {
   element.bind('blur', function () {
