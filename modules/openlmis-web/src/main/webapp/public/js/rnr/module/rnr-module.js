@@ -52,105 +52,76 @@ rnrModule.factory('RequisitionService', ["$rootScope", "$q", function ($rootScop
 
     requisition: function ($q, $timeout, Requisitions, $route, $rootScope) {
       var deferred = $q.defer();
-      $timeout(function () {
-        var rnr = data.requisition;
-        if (rnr) {
-          deferred.resolve(rnr);
-          return;
-        }
-        Requisitions.get({id: $route.current.params.rnr}, function (response) {
-          data.requisition = response.rnr;
-          deferred.resolve(response.rnr);
-        }, {});
-      }, 100);
+      var rnr = data.requisition;
+      if (rnr) {
+        deferred.resolve(rnr);
+        return;
+      }
+      Requisitions.get({id: $route.current.params.rnr}, function (response) {
+        data.requisition = response.rnr;
+        deferred.resolve(response.rnr);
+      }, {});
       return deferred.promise;
     },
 
     rnrColumns: function ($q, $timeout, ProgramRnRColumnList, $route) {
       var deferred = $q.defer();
-      $timeout(function () {
-        ProgramRnRColumnList.get({programId: $route.current.params.program}, function (response) {
-          data.rnrColumnList = response.rnrColumnList;
-          deferred.resolve(data.rnrColumnList);
-        }, {});
-      }, 100);
+      ProgramRnRColumnList.get({programId: $route.current.params.program}, function (response) {
+        data.rnrColumnList = response.rnrColumnList;
+        deferred.resolve(data.rnrColumnList);
+      }, {});
       return deferred.promise;
     },
 
     currency: function ($q, $timeout, ReferenceData) {
       var deferred = $q.defer();
-      $timeout(function () {
-        ReferenceData.get({}, function (response) {
-          data.currency = response.currency;
-          deferred.resolve(data.currency);
-        }, {});
-      }, 100);
+      ReferenceData.get({}, function (response) {
+        data.currency = response.currency;
+        deferred.resolve(data.currency);
+      }, {});
       return deferred.promise;
     },
 
     lossesAndAdjustmentsTypes: function ($q, $timeout, LossesAndAdjustmentsReferenceData) {
       var deferred = $q.defer();
-      $timeout(function () {
-        LossesAndAdjustmentsReferenceData.get({}, function (response) {
-          data.lossAdjustmentTypes = response.lossAdjustmentTypes;
-          deferred.resolve(data.lossAdjustmentTypes);
-        }, {});
-      }, 100);
+      LossesAndAdjustmentsReferenceData.get({}, function (response) {
+        data.lossAdjustmentTypes = response.lossAdjustmentTypes;
+        deferred.resolve(data.lossAdjustmentTypes);
+      }, {});
       return deferred.promise;
     },
 
     facilityApprovedProducts: function ($q, $timeout, $route, FacilityApprovedProducts) {
       var deferred = $q.defer();
-      $timeout(function () {
-        FacilityApprovedProducts.get({facilityId: $route.current.params.facility, programId: $route.current.params.program}, function (response) {
-          data.nonFullSupplyProducts = response.nonFullSupplyProducts;
-          deferred.resolve(data.nonFullSupplyProducts);
-        }, {});
-      }, 100);
+      FacilityApprovedProducts.get({facilityId: $route.current.params.facility, programId: $route.current.params.program}, function (response) {
+        data.nonFullSupplyProducts = response.nonFullSupplyProducts;
+        deferred.resolve(data.nonFullSupplyProducts);
+      }, {});
       return deferred.promise;
     },
 
     requisitionRights: function ($q, $timeout, $route, FacilityProgramRights) {
       var deferred = $q.defer();
-      $timeout(function () {
-        FacilityProgramRights.get({facilityId: $route.current.params.facility, programId: $route.current.params.program}, function (response) {
-          data.requisitionRights = response.rights;
-          deferred.resolve(data.requisitionRights);
-        }, {});
-      }, 100);
+      FacilityProgramRights.get({facilityId: $route.current.params.facility, programId: $route.current.params.program}, function (response) {
+        data.requisitionRights = response.rights;
+        deferred.resolve(data.requisitionRights);
+      }, {});
       return deferred.promise;
     },
 
     regimenTemplate: function ($q, $timeout, $route, ProgramRegimenTemplate) {
       var deferred = $q.defer();
-      $timeout(function () {
-        ProgramRegimenTemplate.get({programId: $route.current.params.program}, function (response) {
-          data.regimenTemplate = response.template;
-          deferred.resolve(data.regimenTemplate);
-        }, {});
-      }, 100);
+      ProgramRegimenTemplate.get({programId: $route.current.params.program}, function (response) {
+        data.regimenTemplate = response.template;
+        deferred.resolve(data.regimenTemplate);
+      }, {});
       return deferred.promise;
     }
 
   };
 
   return {
-
-    data: data,
-
-    init: initializeService,
-
-    getData: function (key) {
-      if (initialized) {
-        return data[key];
-      }
-      return undefined;
-    },
-
-    saveRnr: function (rnr) {
-
-    }
-
+    init: initializeService
   }
 
 }]);
