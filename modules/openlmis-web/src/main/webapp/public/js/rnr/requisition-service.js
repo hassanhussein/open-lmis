@@ -1,13 +1,11 @@
-rnrModule.service('RequisitionService', function ($rootScope, $q, $route,
-                                                  Requisitions,
-                                                  ProgramRnRColumnList,
-                                                  ReferenceData,
-                                                  LossesAndAdjustmentsReferenceData,
-                                                  FacilityApprovedProducts,
-                                                  FacilityProgramRights,
+rnrModule.service('RequisitionService', function ($rootScope, $q, $route, Requisitions, ProgramRnRColumnList,
+                                                  ReferenceData, LossesAndAdjustmentsReferenceData,
+                                                  FacilityApprovedProducts, FacilityProgramRights,
                                                   ProgramRegimenTemplate) {
 
     var promises = [];
+
+    this.initialized = false;
 
     var requisition = function ($q, Requisitions, $route) {
       var deferred = $q.defer();
@@ -33,8 +31,7 @@ rnrModule.service('RequisitionService', function ($rootScope, $q, $route,
       return deferred.promise;
     };
 
-    var lossesAndAdjustmentsTypes = function ($q,
-                                              LossesAndAdjustmentsReferenceData) {
+    var lossesAndAdjustmentsTypes = function ($q, LossesAndAdjustmentsReferenceData) {
       var deferred = $q.defer();
       LossesAndAdjustmentsReferenceData.get({}, function (response) {
         deferred.resolve({key: 'lossesAndAdjustmentsTypes', response: response.lossAdjustmentTypes});
@@ -42,8 +39,7 @@ rnrModule.service('RequisitionService', function ($rootScope, $q, $route,
       return deferred.promise;
     };
 
-    var facilityApprovedProducts = function ($q, $route,
-                                             FacilityApprovedProducts) {
+    var facilityApprovedProducts = function ($q, $route, FacilityApprovedProducts) {
       var deferred = $q.defer();
       FacilityApprovedProducts.get({facilityId: $route.current.params.facility, programId: $route.current.params.program}, function (response) {
         deferred.resolve({key: 'facilityApprovedProducts', response: response.nonFullSupplyProducts});
@@ -67,7 +63,7 @@ rnrModule.service('RequisitionService', function ($rootScope, $q, $route,
       return deferred.promise;
     };
 
-    this.initializeService = function () {
+    this.initialize = function () {
 
       promises.push(requisition($q, Requisitions, $route));
       promises.push(currency($q, ReferenceData));
@@ -86,6 +82,5 @@ rnrModule.service('RequisitionService', function ($rootScope, $q, $route,
       });
     };
 
-    this.initializeService();
   }
 );

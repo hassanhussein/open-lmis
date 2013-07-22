@@ -4,15 +4,14 @@
  * If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-function CreateRequisitionController($scope, $location, $rootScope, $dialog,
-                                     Requisitions, RequisitionService,
+function CreateRequisitionController($scope, $location, $rootScope, $dialog, Requisitions, RequisitionService,
                                      $routeParams, messageService) {
   $scope.visibleTab = $routeParams.supplyType;
   $scope.baseUrl = "/create-rnr/" + $routeParams.rnr + '/' + $routeParams.facility + '/' + $routeParams.program;
 
-  RequisitionService.initializeService();
+  RequisitionService.initialize();
 
-  $scope.$on('rnrInitialized', function(event, data) {
+  $scope.$on('rnrInitialized', function (event, data) {
     initController(data);
   });
 
@@ -58,7 +57,7 @@ function CreateRequisitionController($scope, $location, $rootScope, $dialog,
     else {
       $scope.fullScreen ? angular.element('.toggleFullScreen').hide() : angular.element('.toggleFullScreen').show();
     }
-    $scope.fullScreen ? angular.element('.print-button').css('opacity','1.0') : angular.element('.print-button').css('opacity','0');
+    $scope.fullScreen ? angular.element('.print-button').css('opacity', '1.0') : angular.element('.print-button').css('opacity', '0');
   });
 
   $scope.fillPagedGridData = function () {
@@ -185,14 +184,14 @@ function CreateRequisitionController($scope, $location, $rootScope, $dialog,
 
   var submitValidatedRnr = function () {
     Requisitions.update({id: $scope.rnr.id, operation: "submit"},
-        {}, function (data) {
-          $scope.rnr.status = "SUBMITTED";
-          $scope.formDisabled = !$scope.hasPermission('AUTHORIZE_REQUISITION');
-          $scope.submitMessage = data.success;
-          $scope.saveRnrForm.$setPristine();
-        }, function (data) {
-          $scope.submitError = data.data.error;
-        });
+      {}, function (data) {
+        $scope.rnr.status = "SUBMITTED";
+        $scope.formDisabled = !$scope.hasPermission('AUTHORIZE_REQUISITION');
+        $scope.submitMessage = data.success;
+        $scope.saveRnrForm.$setPristine();
+      }, function (data) {
+        $scope.submitError = data.data.error;
+      });
   };
 
   $scope.dialogCloseCallback = function (result) {
