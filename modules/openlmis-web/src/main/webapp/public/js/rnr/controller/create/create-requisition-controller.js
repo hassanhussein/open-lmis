@@ -4,20 +4,16 @@
  * If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-function CreateRequisitionController($q, $timeout, $scope, $route, $location, $rootScope, $dialog,
-                                     ProgramRnRColumnList, LossesAndAdjustmentsReferenceData, FacilityApprovedProducts, FacilityProgramRights,
-                                     ProgramRegimenTemplate, ReferenceData, Requisitions, RequisitionService,
+function CreateRequisitionController($scope, $location, $rootScope, $dialog,
+                                     Requisitions, RequisitionService,
                                      $routeParams, messageService) {
   $scope.visibleTab = $routeParams.supplyType;
   $scope.baseUrl = "/create-rnr/" + $routeParams.rnr + '/' + $routeParams.facility + '/' + $routeParams.program;
 
-  RequisitionService.init($q, $timeout, $route, Requisitions,
-    ProgramRnRColumnList, LossesAndAdjustmentsReferenceData, FacilityApprovedProducts, FacilityProgramRights,
-    ProgramRegimenTemplate, ReferenceData);
+  RequisitionService.initializeService();
 
   $scope.$on('rnrInitialized', function(event, data) {
     initController(data);
-    console.log("initialized!!", data);
   });
 
   function initController(data) {

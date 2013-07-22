@@ -32,7 +32,7 @@ public class TestWebDriver {
   private static WebDriver driver;
   private String BASE_URL;
   private String ERROR_MESSAGE_LOGIN;
-  private int DEFAULT_WAIT_TIME = 30;
+  private int DEFAULT_WAIT_TIME = 10;
 
 
   public TestWebDriver(WebDriver driver) {
