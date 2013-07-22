@@ -34,8 +34,8 @@ rnrModule.factory('RequisitionService', ["$rootScope", "$q", function ($rootScop
   var initialized = false;
 
   var initializeService = function ($q, $timeout, $route, Requisitions, ProgramRnRColumnList, LossesAndAdjustmentsReferenceData, FacilityApprovedProducts, FacilityProgramRights, ProgramRegimenTemplate, ReferenceData) {
-    promises.push(dataGetter.requisition($q, $timeout, Requisitions, $route, $rootScope));
-    promises.push(dataGetter.currency($q, $timeout, ReferenceData))
+    promises.push(dataGetter.requisition($q, $timeout, Requisitions, $route));
+    promises.push(dataGetter.currency($q, $timeout, ReferenceData));
     promises.push(dataGetter.rnrColumns($q, $timeout, ProgramRnRColumnList, $route));
     promises.push(dataGetter.lossesAndAdjustmentsTypes($q, $timeout, LossesAndAdjustmentsReferenceData));
     promises.push(dataGetter.facilityApprovedProducts($q, $timeout, $route, FacilityApprovedProducts));
@@ -46,21 +46,21 @@ rnrModule.factory('RequisitionService', ["$rootScope", "$q", function ($rootScop
       initialized = true;
       $rootScope.$broadcast('rnrInitialized', data);
     });
-  }
+  };
 
   var dataGetter = {
 
-    requisition: function ($q, $timeout, Requisitions, $route, $rootScope) {
+    requisition: function ($q, $timeout, Requisitions, $route) {
       var deferred = $q.defer();
       var rnr = data.requisition;
       if (rnr) {
         deferred.resolve(rnr);
-        return;
+      } else {
+        Requisitions.get({id: $route.current.params.rnr}, function (response) {
+          data.requisition = response.rnr;
+          deferred.resolve(response.rnr);
+        }, {});
       }
-      Requisitions.get({id: $route.current.params.rnr}, function (response) {
-        data.requisition = response.rnr;
-        deferred.resolve(response.rnr);
-      }, {});
       return deferred.promise;
     },
 
@@ -85,8 +85,8 @@ rnrModule.factory('RequisitionService', ["$rootScope", "$q", function ($rootScop
     lossesAndAdjustmentsTypes: function ($q, $timeout, LossesAndAdjustmentsReferenceData) {
       var deferred = $q.defer();
       LossesAndAdjustmentsReferenceData.get({}, function (response) {
-        data.lossAdjustmentTypes = response.lossAdjustmentTypes;
-        deferred.resolve(data.lossAdjustmentTypes);
+        data.lossesAndAdjustmentsTypes = response.lossAdjustmentTypes;
+        deferred.resolve(data.lossesAndAdjustmentsTypes);
       }, {});
       return deferred.promise;
     },
@@ -94,8 +94,8 @@ rnrModule.factory('RequisitionService', ["$rootScope", "$q", function ($rootScop
     facilityApprovedProducts: function ($q, $timeout, $route, FacilityApprovedProducts) {
       var deferred = $q.defer();
       FacilityApprovedProducts.get({facilityId: $route.current.params.facility, programId: $route.current.params.program}, function (response) {
-        data.nonFullSupplyProducts = response.nonFullSupplyProducts;
-        deferred.resolve(data.nonFullSupplyProducts);
+        data.facilityApprovedProducts = response.nonFullSupplyProducts;
+        deferred.resolve(data.facilityApprovedProducts);
       }, {});
       return deferred.promise;
     },
@@ -126,7 +126,7 @@ rnrModule.factory('RequisitionService', ["$rootScope", "$q", function ($rootScop
 
 }]);
 
-rnrModule.positiveInteger = function (element, ctrl, scope) {
+rnrModule.positiveInteger = function (element, ctrl) {
   element.bind('blur', function () {
     validationFunction(ctrl.$viewValue, element.attr('name'));
   });
