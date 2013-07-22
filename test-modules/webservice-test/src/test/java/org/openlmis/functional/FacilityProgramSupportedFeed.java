@@ -19,12 +19,16 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
+import static com.thoughtworks.selenium.SeleneseTestNgHelper.assertFalse;
 import static com.thoughtworks.selenium.SeleneseTestNgHelper.assertTrue;
 
 
-public class FacilityFeed extends TestCaseHelper {
+public class FacilityProgramSupportedFeed extends TestCaseHelper {
   public WebDriver driver;
 
   @BeforeMethod(groups = {"webservice"})
@@ -42,7 +46,7 @@ public class FacilityFeed extends TestCaseHelper {
   }
 
   @Test(groups = {"webservice"}, dataProvider = "Data-Provider-Function-Positive")
-  public void testFacilityFeed(String user, String program, String[] credentials) throws Exception {
+  public void testFacilityProgramSupportedFeed(String user, String program, String[] credentials) throws Exception {
     HttpClient client = new HttpClient();
     client.createContext();
 
@@ -62,21 +66,56 @@ public class FacilityFeed extends TestCaseHelper {
     String date_time = createFacilityPage.enterValuesInFacilityAndClickSave(facilityCodePrefix, facilityNamePrefix, program, geoZone, facilityType, operatedBy, "");
     createFacilityPage.verifyMessageOnFacilityScreen(facilityNamePrefix + date_time, "created");
 
-    ResponseEntity responseEntity = client.SendJSON("", "http://localhost:9091/feeds/facility/recent", "GET", "", "");
-    assertTrue(responseEntity.getResponse().contains("\"code\":\"" + facilityCodePrefix + date_time + "\",\"name\":\"" + facilityNamePrefix + date_time + "\""));
+    String str_date = date_time.split("-")[0].substring(0, 6) + "25";
+    DateFormat formatter;
+    Date d;
+    formatter = new SimpleDateFormat("yyyyMMdd");
+    d = (Date) formatter.parse(str_date);
+    long dateLong = d.getTime();
+
+    ResponseEntity responseEntity = client.SendJSON("", "http://localhost:9091/feeds/programSupported/recent", "GET", "", "");
+    String expected = "\"facilityCode\":\"" + facilityCodePrefix + date_time + "\",\"programsSupported\":[{\"code\":\"" + program + "\",\"name\":\"" + program + "\",\"active\":true,\"startDate\":" + dateLong;
+    assertTrue(responseEntity.getResponse().contains(expected));
 
     DeleteFacilityPage deleteFacilityPage = homePage.navigateSearchFacility();
     deleteFacilityPage.searchFacility(date_time);
     deleteFacilityPage.clickFacilityList(date_time);
-    deleteFacilityPage.deleteFacility(facilityCodePrefix + date_time, facilityNamePrefix + date_time);
-    deleteFacilityPage.verifyDeletedFacility(facilityCodePrefix + date_time, facilityNamePrefix + date_time);
-    deleteFacilityPage.restoreFacility();
-    responseEntity = client.SendJSON("", "http://localhost:9091/feeds/facility/recent", "GET", "", "");
+    createFacilityPage.addProgram("VACCINES", true);
+    createFacilityPage.saveFacility();
+
+    Thread.sleep(5000);
+    responseEntity = client.SendJSON("", "http://localhost:9091/feeds/programSupported/recent", "GET", "", "");
 
     List<String> feedJSONList = XmlUtils.getNodeValues(responseEntity.getResponse(), "content");
-    assertTrue(feedJSONList.get(0).contains("\"active\":true"));
+    assertTrue(feedJSONList.get(1).contains("\"active\":true"));
     assertTrue(feedJSONList.get(1).contains("\"active\":false"));
-    //assertTrue(feedJSONList.get(2).contains("\"active\":true"));
+
+    deleteFacilityPage = homePage.navigateSearchFacility();
+    deleteFacilityPage.searchFacility(date_time);
+    deleteFacilityPage.clickFacilityList(date_time);
+    createFacilityPage.removeFirstProgram();
+    createFacilityPage.saveFacility();
+
+    Thread.sleep(5000);
+    responseEntity = client.SendJSON("", "http://localhost:9091/feeds/programSupported/recent", "GET", "", "");
+
+    feedJSONList = XmlUtils.getNodeValues(responseEntity.getResponse(), "content");
+    assertTrue(feedJSONList.get(2).contains("\"active\":false"));
+    assertFalse(feedJSONList.get(2).contains("\"active\":true"));
+
+    deleteFacilityPage = homePage.navigateSearchFacility();
+    deleteFacilityPage.searchFacility(date_time);
+    deleteFacilityPage.clickFacilityList(date_time);
+    createFacilityPage.activeInactiveFirstProgram();
+    createFacilityPage.saveFacility();
+
+    Thread.sleep(5000);
+    responseEntity = client.SendJSON("", "http://localhost:9091/feeds/programSupported/recent", "GET", "", "");
+
+    feedJSONList = XmlUtils.getNodeValues(responseEntity.getResponse(), "content");
+    assertTrue(feedJSONList.get(3).contains("\"active\":true"));
+    assertFalse(feedJSONList.get(3).contains("\"active\":false"));
+
   }
 
   @DataProvider(name = "Data-Provider-Function-Positive")
