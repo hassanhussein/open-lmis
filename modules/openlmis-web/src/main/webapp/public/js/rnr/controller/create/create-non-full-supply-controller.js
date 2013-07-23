@@ -4,7 +4,7 @@
  * If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-function CreateNonFullSupplyController($scope, messageService) {
+function CreateNonFullSupplyController($scope, $routeParams, messageService, RequisitionService) {
   $scope.visibleNonFullSupplyColumns = _.filter($scope.visibleColumns, function (column) {
     return _.contains(RnrLineItem.visibleForNonFullSupplyColumns, column.name);
   });
@@ -26,6 +26,19 @@ function CreateNonFullSupplyController($scope, messageService) {
     var validNonFullSupplyLineItems = [];
     var lineItem;
     var invalid = false;
+
+    function displayProductsAddedMessage() {
+      if ($scope.addedNonFullSupplyProducts.length > 0) {
+        $scope.$parent.$parent.$parent.message = "msg.product.added";
+        setTimeout(function () {
+          $scope.$apply(function () {
+            angular.element("#saveSuccessMsgDiv").fadeOut('slow', function () {
+              $scope.$parent.$parent.$parent.message = '';
+            });
+          });
+        }, 3000);
+      }
+    }
 
     $($scope.addedNonFullSupplyProducts).each(function (i, nonFullSupplyProduct) {
       lineItem = nonFullSupplyProduct;
@@ -53,19 +66,17 @@ function CreateNonFullSupplyController($scope, messageService) {
 
     $scope.fillPagedGridData();
     displayProductsAddedMessage();
+    //TODO form's dirty flag should not be changed
     $scope.saveRnrForm.$dirty = (validNonFullSupplyLineItems.length > 0);
     $scope.nonFullSupplyProductsModal = false;
   };
 
-  $scope.resetNonFullSupplyModal = function () {
+
+  $scope.showAddNonFullSupplyModal = function () {
     $scope.addedNonFullSupplyProducts = [];
     $scope.nonFullSupplyProductCategory = undefined;
     $scope.nonFullSupplyProductsToDisplay = undefined;
     $scope.clearNonFullSupplyProductModalData();
-  };
-
-  $scope.showAddNonFullSupplyModal = function () {
-    $scope.resetNonFullSupplyModal();
     $scope.nonFullSupplyProductsModal = true;
   };
 
@@ -84,6 +95,15 @@ function CreateNonFullSupplyController($scope, messageService) {
   };
 
   $scope.addNonFullSupplyProductsByCategory = function () {
+    var prepareNFSLineItemFields = function () {
+      populateProductInformation();
+      $(['quantityReceived', 'quantityDispensed', 'beginningBalance', 'stockInHand', 'totalLossesAndAdjustments', 'calculatedOrderQuantity', 'newPatientCount',
+        'stockOutDays', 'normalizedConsumption', 'amc', 'maxStockQuantity']).each(function (index, field) {
+          $scope.newNonFullSupply[field] = 0;
+        });
+      $scope.newNonFullSupply.rnrId = $scope.$parent.rnr.id;
+    }
+
     prepareNFSLineItemFields();
     var rnrLineItem = new RnrLineItem($scope.newNonFullSupply, $scope.rnr.period.numberOfMonths, $scope.programRnrColumnList, $scope.rnr.status);
     $scope.addedNonFullSupplyProducts.push(rnrLineItem);
@@ -106,18 +126,6 @@ function CreateNonFullSupplyController($scope, messageService) {
     $scope.updateNonFullSupplyProductsToDisplay();
   };
 
-  function displayProductsAddedMessage() {
-    if ($scope.addedNonFullSupplyProducts.length > 0) {
-      $scope.$parent.$parent.$parent.message = "msg.product.added";
-      setTimeout(function () {
-        $scope.$apply(function () {
-          angular.element("#saveSuccessMsgDiv").fadeOut('slow', function () {
-            $scope.$parent.$parent.$parent.message = '';
-          });
-        });
-      }, 3000);
-    }
-  }
 
   function populateProductInformation() {
     var product = {};
@@ -129,7 +137,8 @@ function CreateNonFullSupplyController($scope, messageService) {
         (product.form.code == null ? "" : (product.form.code + " ")) +
         (product.strength == null ? "" : (product.strength + " ")) +
         (product.dosageUnit.code == null ? "" : product.dosageUnit.code);
-      $(['dosesPerDispensingUnit', 'packSize', 'roundToZero', 'packRoundingThreshold', 'dispensingUnit', 'fullSupply']).each(function (index, field) {
+      $(['dosesPerDispensingUnit', 'packSize', 'roundToZero', 'packRoundingThreshold', 'dispensingUnit', 'fullSupply']).each(function (index,
+                                                                                                                                       field) {
         $scope.newNonFullSupply[field] = product[field];
       });
       $scope.newNonFullSupply.maxMonthsOfStock = $scope.facilityApprovedProduct.maxMonthsOfStock;
@@ -139,15 +148,6 @@ function CreateNonFullSupplyController($scope, messageService) {
       $scope.newNonFullSupply.productDisplayOrder = $scope.facilityApprovedProduct.programProduct.product.displayOrder;
       $scope.newNonFullSupply.productCategoryDisplayOrder = $scope.nonFullSupplyProductCategory.displayOrder;
     }
-  }
-
-  function prepareNFSLineItemFields() {
-    populateProductInformation();
-    $(['quantityReceived', 'quantityDispensed', 'beginningBalance', 'stockInHand', 'totalLossesAndAdjustments', 'calculatedOrderQuantity', 'newPatientCount',
-      'stockOutDays', 'normalizedConsumption', 'amc', 'maxStockQuantity']).each(function (index, field) {
-        $scope.newNonFullSupply[field] = 0;
-      });
-    $scope.newNonFullSupply.rnrId = $scope.$parent.rnr.id;
   }
 
 
