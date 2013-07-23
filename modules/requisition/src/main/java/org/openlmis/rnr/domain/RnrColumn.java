@@ -9,7 +9,6 @@ package org.openlmis.rnr.domain;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import org.openlmis.core.domain.Column;
 
 @Data
 @NoArgsConstructor
@@ -45,6 +44,18 @@ public class RnrColumn extends Column {
     }
     return 40;
   }
+
+  @Override
+  public ColumnType getColumnType() {
+    if (this.getName().equals("price") || this.getName().equals("cost")) {
+      return ColumnType.CURRENCY;
+    }
+    if (this.getName().equals("product") || this.getName().equals("dispensingUnit") || this.getName().equals("productCode")) {
+      return ColumnType.TEXT;
+    }
+    return ColumnType.NUMERIC;
+  }
+
 
   @Override
   public boolean equals(Object o) {

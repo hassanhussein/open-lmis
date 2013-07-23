@@ -4,14 +4,13 @@
  * If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-package org.openlmis.web.form;
+package org.openlmis.rnr.domain;
 
-import lombok.Data;
-import org.openlmis.rnr.dto.RnrDTO;
+public enum ColumnType {
 
-import java.util.List;
+  TEXT,
+  NUMERIC,
+  CURRENCY
 
-@Data
-public class RnrList {
-  private List<RnrDTO> rnrList;
+
 }

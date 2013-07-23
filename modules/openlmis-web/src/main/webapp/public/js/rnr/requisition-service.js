@@ -1,7 +1,7 @@
 rnrModule.service('RequisitionService', function ($rootScope, $q, $route, Requisitions, ProgramRnRColumnList,
                                                   ReferenceData, LossesAndAdjustmentsReferenceData,
                                                   FacilityApprovedProducts, FacilityProgramRights,
-                                                  ProgramRegimenTemplate) {
+                                                  ProgramRegimenTemplate, LineItemPageSize) {
 
     var promises = [];
 
@@ -63,6 +63,15 @@ rnrModule.service('RequisitionService', function ($rootScope, $q, $route, Requis
       return deferred.promise;
     };
 
+    var pageSize = function ($q, LineItemPageSize) {
+      var deferred = $q.defer();
+      LineItemPageSize.get({}, function (data) {
+        deferred.resolve({key: 'pageSize', response: data.pageSize});
+      }, {});
+
+      return deferred.promise;
+    };
+
     this.initialize = function () {
 
       promises.push(requisition($q, Requisitions, $route));
@@ -72,6 +81,7 @@ rnrModule.service('RequisitionService', function ($rootScope, $q, $route, Requis
       promises.push(facilityApprovedProducts($q, $route, FacilityApprovedProducts));
       promises.push(requisitionRights($q, $route, FacilityProgramRights));
       promises.push(regimenTemplate($q, $route, ProgramRegimenTemplate));
+      promises.push(pageSize($q, LineItemPageSize));
 
       $q.all(promises).then(function (values) {
         var data = {};

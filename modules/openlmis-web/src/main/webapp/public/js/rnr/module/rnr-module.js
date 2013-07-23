@@ -14,15 +14,13 @@ var rnrModule = angular.module('rnr', ['openlmis', 'ngGrid', 'ui.bootstrap.modal
       when('/rnr-for-approval/:rnr/:program', {controller: ApproveRnrController, templateUrl: 'partials/approve/approve.html', resolve: ApproveRnrController.resolve, reloadOnSearch: false}).
       when('/requisition/:rnr/:program', {controller: ViewRnrController, templateUrl: 'partials/view/view.html', resolve: ViewRnrController.resolve, reloadOnSearch: false}).
       otherwise({redirectTo: '/init-rnr'});
-  }]).directive('rnrValidator',function () {
+  }]).directive('rnrValidator', function () {
     return {
       require: '?ngModel',
       link: function (scope, element, attrs, ctrl) {
         rnrModule[attrs.rnrValidator](element, ctrl, scope);
       }
     };
-  }).run(function ($rootScope) {
-    $rootScope.pageSize = 20;
   });
 
 rnrModule.positiveInteger = function (element, ctrl) {

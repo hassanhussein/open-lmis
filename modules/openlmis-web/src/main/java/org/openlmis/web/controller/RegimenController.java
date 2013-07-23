@@ -2,10 +2,10 @@ package org.openlmis.web.controller;
 
 import org.openlmis.core.domain.Regimen;
 import org.openlmis.core.domain.RegimenCategory;
-import org.openlmis.core.domain.RegimenTemplate;
 import org.openlmis.core.exception.DataException;
 import org.openlmis.core.service.ProgramService;
 import org.openlmis.core.service.RegimenService;
+import org.openlmis.rnr.domain.RegimenTemplate;
 import org.openlmis.rnr.service.RegimenColumnService;
 import org.openlmis.web.form.RegimenFormDTO;
 import org.openlmis.web.response.OpenLmisResponse;
@@ -46,8 +46,7 @@ public class RegimenController extends BaseController {
   @PreAuthorize("@permissionEvaluator.hasPermission(principal,'MANAGE_REGIMEN_TEMPLATE')")
   public ResponseEntity<OpenLmisResponse> save(@PathVariable Long programId, @RequestBody RegimenFormDTO regimenFormDTO, HttpServletRequest request) {
     regimenService.save(regimenFormDTO.getRegimens(), loggedInUserId(request));
-    RegimenTemplate regimenTemplate = regimenFormDTO.getRegimenTemplate();
-    regimenTemplate.setProgramId(programId);
+    RegimenTemplate regimenTemplate = new RegimenTemplate(programId, regimenFormDTO.getRegimenColumnList());
     regimenColumnService.save(regimenTemplate, loggedInUserId(request));
     return success(REGIMENS_SAVED_SUCCESSFULLY);
   }
