@@ -57,7 +57,7 @@ function CreateNonFullSupplyController($scope, $location, $dialog, RequisitionSe
       return lineItem1.compareTo(lineItem2);
     });
 
-    $scope.fillPagedGridData();
+    RequisitionService.fillPagedGridData($scope, $routeParams);
     displayProductsAddedMessage();
     //TODO form's dirty flag should not be changed
     $scope.saveRnrForm.$dirty = (validNonFullSupplyLineItems.length > 0);
@@ -185,7 +185,7 @@ function CreateNonFullSupplyController($scope, $location, $dialog, RequisitionSe
     $scope.regimenCount = $scope.rnr.regimenLineItems.length;
     $scope.currency = data.currency;
 
-    RequisitionService.prepareRnr($scope);
+    RequisitionService.prepareRnr($scope, $routeParams);
 
     if (!$scope.programRnrColumnList || $scope.programRnrColumnList.length == 0) {
       $scope.error = "error.rnr.template.not.defined";

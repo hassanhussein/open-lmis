@@ -33,7 +33,7 @@ function CreateRegimenLineItemController($scope, $location, $routeParams, $dialo
     $scope.regimenCount = $scope.rnr.regimenLineItems.length;
     $scope.currency = data.currency;
 
-    RequisitionService.prepareRnr($scope);
+    RequisitionService.prepareRnr($scope, $routeParams);
 
     $scope.showCategory = function (index) {
       return !((index > 0 ) && ($scope.rnr.regimenLineItems[index].category.name == $scope.rnr.regimenLineItems[index - 1].category.name));

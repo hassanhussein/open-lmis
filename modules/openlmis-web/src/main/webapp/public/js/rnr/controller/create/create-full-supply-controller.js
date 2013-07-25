@@ -82,8 +82,6 @@ function CreateFullSupplyController($scope, $location, $dialog, RequisitionServi
   }
 
 
-//---------------------//////////////////
-
   RequisitionService.stuffScope($scope, $location, $routeParams, $dialog);
 
 
@@ -109,7 +107,7 @@ function CreateFullSupplyController($scope, $location, $dialog, RequisitionServi
     $scope.regimenCount = $scope.rnr.regimenLineItems.length;
     $scope.currency = data.currency;
 
-    RequisitionService.prepareRnr($scope);
+    RequisitionService.prepareRnr($scope, $routeParams);
 
     if (!$scope.programRnrColumnList || $scope.programRnrColumnList.length == 0) {
       $scope.error = "error.rnr.template.not.defined";

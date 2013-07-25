@@ -196,6 +196,20 @@ rnrModule.service('RequisitionService', function ($rootScope, $q, $route, Requis
     return fullSupplyError || nonFullSupplyError || regimenError;
   }
 
+  this.fillPagedGridData = function (scope, routeParams) {
+    if (scope.visibleTab == "regimen") {
+      scope.numberOfPages = 1;
+      scope.pageLineItems = scope.rnr.regimenLineItems;
+    } else {
+      var gridLineItems = scope.visibleTab == "non-full-supply" ?
+        scope.rnr.nonFullSupplyLineItems : scope.visibleTab == "full-supply" ? scope.rnr.fullSupplyLineItems : [];
+      scope.numberOfPages = Math.ceil(gridLineItems.length / scope.pageSize) ? Math.ceil(gridLineItems.length / scope.pageSize) : 1;
+      scope.currentPage = (utils.isValidPage(routeParams.page, scope.numberOfPages)) ? parseInt(routeParams.page, 10) : 1;
+      scope.pageLineItems = gridLineItems.slice((scope.pageSize * (scope.currentPage - 1)), scope.pageSize * scope.currentPage);
+    }
+  };
+
+
   this.stuffScope = function (scope, location, routeParams, dialog) {
     var self = this;
 
@@ -214,11 +228,12 @@ rnrModule.service('RequisitionService', function ($rootScope, $q, $route, Requis
         location.search('page', 1);
       }
 
-      if (scope.saveRnrForm && scope.saveRnrForm.$dirty)
+      if (scope.saveRnrForm && scope.saveRnrForm.$dirty) {
         scope.saveRnr();
-
-      if (scope.rnr)
-        scope.fillPagedGridData();
+      }
+      if (scope.rnr) {
+        self.fillPagedGridData(scope, routeParams);
+      }
     });
 
     scope.saveRnr = function (preventMessage) {
@@ -373,24 +388,10 @@ rnrModule.service('RequisitionService', function ($rootScope, $q, $route, Requis
       }
       scope.fullScreen ? angular.element('.print-button').css('opacity', '1.0') : angular.element('.print-button').css('opacity', '0');
     });
-
-    scope.fillPagedGridData = function () {
-      if (scope.visibleTab == "regimen") {
-        scope.numberOfPages = 1;
-        scope.pageLineItems = scope.rnr.regimenLineItems;
-      } else {
-        var gridLineItems = scope.visibleTab == "non-full-supply" ?
-          scope.rnr.nonFullSupplyLineItems : scope.visibleTab == "full-supply" ? scope.rnr.fullSupplyLineItems : [];
-        scope.numberOfPages = Math.ceil(gridLineItems.length / scope.pageSize) ? Math.ceil(gridLineItems.length / scope.pageSize) : 1;
-        scope.currentPage = (utils.isValidPage(routeParams.page, scope.numberOfPages)) ? parseInt(routeParams.page, 10) : 1;
-        scope.pageLineItems = gridLineItems.slice((scope.pageSize * (scope.currentPage - 1)), scope.pageSize * scope.currentPage);
-      }
-    };
-
-
   };
 
-  this.prepareRnr = function (scope) {
+
+  this.prepareRnr = function (scope, routeParams) {
 
     function resetCostsIfNull(rnr) {
       if (rnr == null) return;
@@ -401,7 +402,7 @@ rnrModule.service('RequisitionService', function ($rootScope, $q, $route, Requis
     }
 
     resetCostsIfNull(scope.rnr);
-    scope.fillPagedGridData();
+    this.fillPagedGridData(scope, routeParams);
     scope.formDisabled = (function () {
       if (scope.rnr) {
         var status = scope.rnr.status;
