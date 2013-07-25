@@ -15,53 +15,44 @@ function CreateNonFullSupplyController($scope, $location, $dialog, RequisitionSe
 
 
   $scope.addNonFullSupplyLineItemsToRnr = function () {
-    var validNonFullSupplyLineItems = [];
-    var lineItem;
-    var invalid = false;
-
-    function displayProductsAddedMessage() {
+    var displayProductsAddedMessage = function () {
       if ($scope.addedNonFullSupplyProducts.length > 0) {
-        $scope.$parent.$parent.message = "msg.product.added";
+        $scope.message = "msg.product.added";
         setTimeout(function () {
           $scope.$apply(function () {
             angular.element("#saveSuccessMsgDiv").fadeOut('slow', function () {
-              $scope.$parent.$parent.message = '';
+              $scope.message = '';
             });
           });
         }, 3000);
       }
     }
 
-    $($scope.addedNonFullSupplyProducts).each(function (i, nonFullSupplyProduct) {
-      lineItem = nonFullSupplyProduct;
-      if (lineItem.validateQuantityRequestedAndReason()) {
-        invalid = true;
-        return false;
-      }
-      validNonFullSupplyLineItems.push(lineItem);
+    var invalid = _.some($scope.addedNonFullSupplyProducts, function (lineItem) {
+      return lineItem.validateQuantityRequestedAndReason();
     });
 
     if (invalid) {
       $scope.modalError = 'error.correct.highlighted';
-      return;
+    } else {
+
+      $scope.modalError = undefined;
+
+      $($scope.addedNonFullSupplyProducts).each(function (i, rnrLineItem) {
+        $scope.rnr.nonFullSupplyLineItems.push(rnrLineItem);
+        $scope.rnr.fillPacksToShip(rnrLineItem);
+      });
+
+      $scope.rnr.nonFullSupplyLineItems.sort(function (lineItem1, lineItem2) {
+        return lineItem1.compareTo(lineItem2);
+      });
+
+      RequisitionService.fillPagedGridData($scope, $routeParams);
+      displayProductsAddedMessage();
+      //TODO form's dirty flag should not be changed
+      $scope.saveRnrForm.$dirty = ($scope.addedNonFullSupplyProducts.length > 0);
+      $scope.nonFullSupplyProductsModal = false;
     }
-    $scope.modalError = undefined;
-
-    //TODO get rid of validNonFullSupplyLineItems, use addedNonFullSupplyProducts instead
-    $(validNonFullSupplyLineItems).each(function (i, rnrLineItem) {
-      $scope.rnr.nonFullSupplyLineItems.push(rnrLineItem);
-      $scope.rnr.fillPacksToShip(rnrLineItem);
-    });
-
-    $scope.rnr.nonFullSupplyLineItems.sort(function (lineItem1, lineItem2) {
-      return lineItem1.compareTo(lineItem2);
-    });
-
-    RequisitionService.fillPagedGridData($scope, $routeParams);
-    displayProductsAddedMessage();
-    //TODO form's dirty flag should not be changed
-    $scope.saveRnrForm.$dirty = (validNonFullSupplyLineItems.length > 0);
-    $scope.nonFullSupplyProductsModal = false;
   };
 
 
@@ -121,20 +112,18 @@ function CreateNonFullSupplyController($scope, $location, $dialog, RequisitionSe
 
 
   function populateProductInformation() {
-    //TODO no need to copy product
-    var product = {};
     if ($scope.facilityApprovedProduct != undefined) {
-      angular.copy($scope.facilityApprovedProduct.programProduct.product, product);
+      var product = $scope.facilityApprovedProduct.programProduct.product;
       $scope.newNonFullSupply.productCode = product.code;
       $scope.newNonFullSupply.productName = product.primaryName;
       $scope.newNonFullSupply.product = (product.primaryName == null ? "" : (product.primaryName + " ")) +
         (product.form.code == null ? "" : (product.form.code + " ")) +
         (product.strength == null ? "" : (product.strength + " ")) +
         (product.dosageUnit.code == null ? "" : product.dosageUnit.code);
-      $(['dosesPerDispensingUnit', 'packSize', 'roundToZero', 'packRoundingThreshold', 'dispensingUnit', 'fullSupply']).each(function (index,
-                                                                                                                                       field) {
-        $scope.newNonFullSupply[field] = product[field];
-      });
+      $(['dosesPerDispensingUnit', 'packSize', 'roundToZero', 'packRoundingThreshold',
+        'dispensingUnit', 'fullSupply']).each(function (index, field) {
+          $scope.newNonFullSupply[field] = product[field];
+        });
       $scope.newNonFullSupply.maxMonthsOfStock = $scope.facilityApprovedProduct.maxMonthsOfStock;
       $scope.newNonFullSupply.dosesPerMonth = $scope.facilityApprovedProduct.programProduct.dosesPerMonth;
       $scope.newNonFullSupply.price = $scope.facilityApprovedProduct.programProduct.currentPrice;

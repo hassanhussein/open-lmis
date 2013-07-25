@@ -20,7 +20,7 @@ var RnrLineItem = function (lineItem, numberOfMonths, programRnrColumnList, rnrS
     this.lossesAndAdjustments = tempLossesAndAdjustments;
   };
 
-  RnrLineItem.prototype.reduceForApproval = function() {
+  RnrLineItem.prototype.reduceForApproval = function () {
     return _.pick(this, 'id', 'productCode', 'quantityApproved', 'remarks');
   };
 
@@ -266,7 +266,7 @@ var RnrLineItem = function (lineItem, numberOfMonths, programRnrColumnList, rnrS
   };
 
   RnrLineItem.prototype.validateRequiredFieldsForNonFullSupply = function () {
-    if (_.findWhere(programRnrColumnList, {name:'quantityRequested'}).visible) {
+    if (_.findWhere(programRnrColumnList, {name: 'quantityRequested'}).visible) {
       return !(isUndefined(this.quantityRequested) || isUndefined(this.reasonForRequestedQuantity));
     }
     return false;
@@ -275,7 +275,7 @@ var RnrLineItem = function (lineItem, numberOfMonths, programRnrColumnList, rnrS
   RnrLineItem.prototype.validateRequiredFieldsForFullSupply = function () {
     var valid = true;
     var rnrLineItem = this;
-    var visibleColumns = _.where(programRnrColumnList, {"visible":true});
+    var visibleColumns = _.where(programRnrColumnList, {"visible": true});
 
     $(visibleColumns).each(function (i, column) {
         var nonMandatoryColumns = ["reasonForRequestedQuantity", "remarks", "lossesAndAdjustments", "quantityApproved"];
@@ -340,11 +340,11 @@ var RnrLineItem = function (lineItem, numberOfMonths, programRnrColumnList, rnrS
 
     if (this.productCategoryDisplayOrder == rnrLineItem.productCategoryDisplayOrder) {
       if (this.productCategory == rnrLineItem.productCategory) {
-        if(isUndefined(this.productDisplayOrder) && isUndefined(rnrLineItem.productDisplayOrder)) {
+        if (isUndefined(this.productDisplayOrder) && isUndefined(rnrLineItem.productDisplayOrder)) {
           return compareStrings(this.productCode, rnrLineItem.productCode);
         }
 
-        if(this.productDisplayOrder== rnrLineItem.productDisplayOrder) {
+        if (this.productDisplayOrder == rnrLineItem.productDisplayOrder) {
           return compareStrings(this.productCode, rnrLineItem.productCode);
         }
 
@@ -361,6 +361,7 @@ var RnrLineItem = function (lineItem, numberOfMonths, programRnrColumnList, rnrS
 
   this.init();
 
+  //TODO a better name?
   RnrLineItem.prototype.validateQuantityRequestedAndReason = function () {
     return (isUndefined(this.quantityRequested) || isUndefined(this.reasonForRequestedQuantity));
   };

@@ -306,41 +306,39 @@ rnrModule.service('RequisitionService', function ($rootScope, $q, $route, Requis
     }
 
 
-    var dialogCloseCallback = function (result) {
+    var showConfirmModal = function (scope, dialog) {
+      var dialogCloseCallback = function (result) {
+        var submitValidatedRnr = function () {
+          Requisitions.update({id: scope.rnr.id, operation: "submit"},
+            {}, function (data) {
+              self.resetFlags(scope);
+              scope.rnr.status = "SUBMITTED";
+              scope.formDisabled = !scope.hasPermission('AUTHORIZE_REQUISITION');
+              scope.submitMessage = data.success;
+              scope.saveRnrForm.$setPristine();
+            }, function (data) {
+              scope.submitError = data.data.error;
+            });
+        };
 
-      var submitValidatedRnr = function () {
-        Requisitions.update({id: scope.rnr.id, operation: "submit"},
-          {}, function (data) {
+        var authorizeValidatedRnr = function () {
+          Requisitions.update({id: scope.rnr.id, operation: "authorize"}, {}, function (data) {
             self.resetFlags(scope);
-            scope.rnr.status = "SUBMITTED";
-            scope.formDisabled = !scope.hasPermission('AUTHORIZE_REQUISITION');
+            scope.rnr.status = "AUTHORIZED";
+            scope.formDisabled = true;
             scope.submitMessage = data.success;
             scope.saveRnrForm.$setPristine();
           }, function (data) {
             scope.submitError = data.data.error;
           });
+        };
+
+        if (result && scope.rnr.status == 'INITIATED')
+          submitValidatedRnr();
+        if (result && scope.rnr.status == 'SUBMITTED')
+          authorizeValidatedRnr();
       };
 
-      var authorizeValidatedRnr = function () {
-        Requisitions.update({id: scope.rnr.id, operation: "authorize"}, {}, function (data) {
-          self.resetFlags(scope);
-          scope.rnr.status = "AUTHORIZED";
-          scope.formDisabled = true;
-          scope.submitMessage = data.success;
-          scope.saveRnrForm.$setPristine();
-        }, function (data) {
-          scope.submitError = data.data.error;
-        });
-      };
-
-      if (result && scope.rnr.status == 'INITIATED')
-        submitValidatedRnr();
-      if (result && scope.rnr.status == 'SUBMITTED')
-        authorizeValidatedRnr();
-    };
-
-
-    var showConfirmModal = function (scope, dialog) {
       var options = {
         id: "confirmDialog",
         header: messageService.get("label.confirm.action"),
