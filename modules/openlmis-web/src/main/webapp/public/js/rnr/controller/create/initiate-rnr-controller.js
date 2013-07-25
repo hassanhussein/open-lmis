@@ -4,7 +4,9 @@
  * If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-function InitiateRnrController($scope, $location, $rootScope, Requisitions, PeriodsForFacilityAndProgram, UserFacilityList, CreateRequisitionProgramList, UserSupervisedFacilitiesForProgram, FacilityProgramRights, navigateBackService, messageService) {
+function InitiateRnrController($scope, $location, $rootScope, Requisitions, PeriodsForFacilityAndProgram,
+                               UserFacilityList, CreateRequisitionProgramList, UserSupervisedFacilitiesForProgram,
+                               FacilityProgramRights, navigateBackService, messageService) {
 
   $rootScope.fullScreen = false;
   var isNavigatedBack;
@@ -194,6 +196,13 @@ function InitiateRnrController($scope, $location, $rootScope, Requisitions, Peri
         });
       };
 
+      var createRnr = function (data) {
+        $scope.rnr = data.rnr;
+        createRnrPath = '/edit/full-supply/' + $scope.rnr.id + '/' +
+          $scope.selectedFacilityId + '/' + $scope.selectedProgram.id + "?page=1";
+        $location.url(createRnrPath);
+      }
+
       Requisitions.get({facilityId: $scope.selectedFacilityId, programId: $scope.selectedProgram.id, periodId: $scope.selectedPeriod.id}, {},
         function (data) {
           if ((data.rnr == null || data.rnr == undefined) && !hasPermission('CREATE_REQUISITION')) {
@@ -205,18 +214,12 @@ function InitiateRnrController($scope, $location, $rootScope, Requisitions, Peri
               $scope.error = messageService.get("error.requisition.not.submitted");
               return;
             }
-            $scope.$parent.rnr = data.rnr;
-            createRnrPath = '/create-rnr/' + $scope.$parent.rnr.id + '/' + $scope.selectedFacilityId + '/' + $scope.selectedProgram.id + "?supplyType=full-supply&page=1";
-            $location.url(createRnrPath);
-          }
-          else {
-            Requisitions.save({facilityId: $scope.selectedFacilityId, programId: $scope.selectedProgram.id, periodId: $scope.selectedPeriod.id}, {}, function (data) {
-              $scope.$parent.rnr = data.rnr;
-              createRnrPath = '/create-rnr/' + $scope.$parent.rnr.id + '/' + $scope.selectedFacilityId + '/' + $scope.selectedProgram.id + "?supplyType=full-supply&page=1";
-              $location.url(createRnrPath);
-            }, function (data) {
-              $scope.error = data.data.error ? data.data.error : messageService.get("error.requisition.not.exist");
-            })
+            createRnr(data);
+          } else {
+            Requisitions.save({facilityId: $scope.selectedFacilityId, programId: $scope.selectedProgram.id, periodId: $scope.selectedPeriod.id}, {},
+              createRnr, function (data) {
+                $scope.error = data.data.error ? data.data.error : messageService.get("error.requisition.not.exist");
+              })
           }
         }, {});
     }, {});

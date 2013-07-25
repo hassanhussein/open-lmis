@@ -7,7 +7,13 @@
 var rnrModule = angular.module('rnr', ['openlmis', 'ngGrid', 'ui.bootstrap.modal', 'ui.bootstrap.dropdownToggle', 'ui.bootstrap.dialog']).config(['$routeProvider', function ($routeProvider) {
     $routeProvider.
       when('/init-rnr', {controller: InitiateRnrController, templateUrl: 'partials/create/init.html', resolve: InitiateRnrController.resolve}).
-      when('/create-rnr/:rnr/:facility/:program', {controller: CreateRequisitionController, templateUrl: 'partials/create/index.html', resolve: CreateRequisitionController.resolve, reloadOnSearch: false}).
+      when('/edit/full-supply/:rnr/:facility/:program',
+      {controller: CreateFullSupplyController, templateUrl: 'partials/create/rnr-full-supply.html', reloadOnSearch: false}).
+      when('/edit/non-full-supply/:rnr/:facility/:program',
+      {controller: CreateNonFullSupplyController, templateUrl: 'partials/create/rnr-non-full-supply.html', reloadOnSearch: false}).
+      when('/edit/regimen/:rnr/:facility/:program',
+      {controller: CreateRegimenLineItemController, templateUrl: 'partials/create/regimen-line-item.html', reloadOnSearch: false}).
+
       when('/rnr-for-approval', {controller: ApproveRnrListController, templateUrl: 'partials/approve/list-for-approval.html', resolve: ApproveRnrListController.resolve}).
       when('/requisitions-for-convert-to-order', {controller: ConvertToOrderListController, templateUrl: 'partials/convert-to-order-list.html', resolve: ConvertToOrderListController.resolve}).
       when('/view-requisitions', {controller: ViewRnrListController, templateUrl: 'partials/view/index.html', resolve: ViewRnrListController.resolve}).

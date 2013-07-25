@@ -4,21 +4,13 @@
  * If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-function CreateNonFullSupplyController($scope, $routeParams, messageService, RequisitionService) {
-  $scope.visibleNonFullSupplyColumns = _.filter($scope.visibleColumns, function (column) {
-    return _.contains(RnrLineItem.visibleForNonFullSupplyColumns, column.name);
-  });
+function CreateNonFullSupplyController($scope, $location, $dialog, RequisitionService, $routeParams, messageService) {
 
-  var map = _.map($scope.facilityApprovedProducts, function (facilitySupportedProduct) {
-    return facilitySupportedProduct.programProduct.product.category;
-  });
-
-  $scope.nonFullSupplyProductsCategories = _.uniq(map, false, function (category) {
-    return category.id;
-  });
+  console.log("controller invoked");
+  $scope.visibleTab = "non-full-supply";
 
   $scope.getId = function (prefix, parent) {
-    return prefix + "_" + parent.$parent.$index;
+    return prefix + "_" + parent.$index;
   };
 
 
@@ -29,11 +21,11 @@ function CreateNonFullSupplyController($scope, $routeParams, messageService, Req
 
     function displayProductsAddedMessage() {
       if ($scope.addedNonFullSupplyProducts.length > 0) {
-        $scope.$parent.$parent.$parent.message = "msg.product.added";
+        $scope.$parent.$parent.message = "msg.product.added";
         setTimeout(function () {
           $scope.$apply(function () {
             angular.element("#saveSuccessMsgDiv").fadeOut('slow', function () {
-              $scope.$parent.$parent.$parent.message = '';
+              $scope.$parent.$parent.message = '';
             });
           });
         }, 3000);
@@ -55,6 +47,7 @@ function CreateNonFullSupplyController($scope, $routeParams, messageService, Req
     }
     $scope.modalError = undefined;
 
+    //TODO get rid of validNonFullSupplyLineItems, use addedNonFullSupplyProducts instead
     $(validNonFullSupplyLineItems).each(function (i, rnrLineItem) {
       $scope.rnr.nonFullSupplyLineItems.push(rnrLineItem);
       $scope.rnr.fillPacksToShip(rnrLineItem);
@@ -86,7 +79,7 @@ function CreateNonFullSupplyController($scope, $routeParams, messageService, Req
   };
 
   $scope.labelForRnrColumn = function (columnName) {
-    if ($scope.$parent.programRnrColumnList) return _.findWhere($scope.$parent.programRnrColumnList, {'name': columnName}).label + ":";
+    if ($scope.programRnrColumnList) return _.findWhere($scope.programRnrColumnList, {'name': columnName}).label + ":";
   };
 
   $scope.shouldDisableAddButton = function () {
@@ -101,7 +94,7 @@ function CreateNonFullSupplyController($scope, $routeParams, messageService, Req
         'stockOutDays', 'normalizedConsumption', 'amc', 'maxStockQuantity']).each(function (index, field) {
           $scope.newNonFullSupply[field] = 0;
         });
-      $scope.newNonFullSupply.rnrId = $scope.$parent.rnr.id;
+      $scope.newNonFullSupply.rnrId = $scope.rnr.id;
     }
 
     prepareNFSLineItemFields();
@@ -128,6 +121,7 @@ function CreateNonFullSupplyController($scope, $routeParams, messageService, Req
 
 
   function populateProductInformation() {
+    //TODO no need to copy product
     var product = {};
     if ($scope.facilityApprovedProduct != undefined) {
       angular.copy($scope.facilityApprovedProduct.programProduct.product, product);
@@ -160,6 +154,63 @@ function CreateNonFullSupplyController($scope, $routeParams, messageService, Req
     return messageService.get('msg.no.matches.found');
   };
 
+  //-------------------//////////////
+
+  RequisitionService.stuffScope($scope, $location, $routeParams, $dialog);
+
+
+  //-------------------------------
+
+
+  $scope.baseUrl = "/edit/non-full-supply/" + $routeParams.rnr + '/' + $routeParams.facility + '/' + $routeParams.program;
+
+  RequisitionService.initialize();
+
+  $scope.$on('rnrInitialized', function (event, data) {
+    console.log("service initialized");
+    initController(data);
+  });
+
+  function initController(data) {
+    $scope.pageSize = data.pageSize;
+    $scope.rnr = data.requisition;
+    $scope.allTypes = data.lossesAndAdjustmentsTypes;
+    $scope.facilityApprovedProducts = data.facilityApprovedProducts;
+    $scope.visibleColumns = _.where(data.rnrColumnList, {'visible': true});
+    $scope.programRnrColumnList = data.rnrColumnList;
+    $scope.requisitionRights = data.requisitionRights;
+    $scope.regimenColumns = data.regimenTemplate ? data.regimenTemplate.columns : [];
+    $scope.visibleRegimenColumns = _.where($scope.regimenColumns, {'visible': true});
+    $scope.addNonFullSupplyLineItemButtonShown = _.findWhere($scope.programRnrColumnList, {'name': 'quantityRequested'});
+    $scope.regimenCount = $scope.rnr.regimenLineItems.length;
+    $scope.currency = data.currency;
+
+    RequisitionService.prepareRnr($scope);
+
+    if (!$scope.programRnrColumnList || $scope.programRnrColumnList.length == 0) {
+      $scope.error = "error.rnr.template.not.defined";
+      $location.path("/init-rnr");
+    }
+
+    $scope.currentPage = ($routeParams.page) ? parseInt($routeParams.page) || 1 : 1;
+
+    $scope.visibleNonFullSupplyColumns = _.filter($scope.visibleColumns, function (column) {
+      return _.contains(RnrLineItem.visibleForNonFullSupplyColumns, column.name);
+    });
+
+    var map = _.map($scope.facilityApprovedProducts, function (facilitySupportedProduct) {
+      return facilitySupportedProduct.programProduct.product.category;
+    });
+
+    $scope.nonFullSupplyProductsCategories = _.uniq(map, false, function (category) {
+      return category.id;
+    });
+
+  }
+
+  var data = RequisitionService.initialize();
+  if (data) initController(data);
+  $scope.message = RequisitionService.message;
 }
 
 

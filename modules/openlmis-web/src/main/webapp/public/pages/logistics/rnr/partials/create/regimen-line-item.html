@@ -4,34 +4,37 @@
   ~ If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
   -->
 
+<ng-include src="'/public/pages/logistics/rnr/partials/header.html'"></ng-include>
 <div ng-controller="CreateRegimenLineItemController">
-  <div class="rnr-table" tab-scroll bottom-offset="180">
-    <table id="regimenTable" fixed-table-header class="table table-bordered scrollable">
-      <thead>
-      <tr>
-        <th class="col-{{regimenColumn.name}}" ng-repeat="regimenColumn in visibleRegimenColumns">
-          <ng-switch on="regimenColumn.label">
-            <div ng-switch-when="header.name">
-              <div class="regimen-heading" openlmis-message="header.name"></div>
-            </div>
-            <div class="regimen-heading" ng-switch-when="header.code">
-              <span openlmis-message="header.code"></span>
-            </div>
-            <div class="regimen-heading" ng-switch-default>
-              <span ng-bind="regimenColumn.label"/>
-            </div>
-          </ng-switch>
-        </th>
-      </tr>
-      </thead>
-      <tbody ng-repeat="regimenLineItem in pageLineItems">
-      <tr>
-        <td class="productCategory" colspan="{{visibleRegimenColumns.length}}" ng-show="showCategory($index)"
-            ng-bind="regimenLineItem.category.name"></td>
-      </tr>
-      <tr>
-        <td class="cell-input" ng-repeat="regimenColumn in visibleRegimenColumns">
-          <ng-switch on="regimenColumn.name">
+  <form name="saveRnrForm" action="#" id="rnr-form" novalidate>
+    <ng-include src="'/public/pages/logistics/rnr/partials/tabs.html'"></ng-include>
+    <div class="rnr-table" tab-scroll bottom-offset="180">
+      <table id="regimenTable" fixed-table-header class="table table-bordered scrollable">
+        <thead>
+        <tr>
+          <th class="col-{{regimenColumn.name}}" ng-repeat="regimenColumn in visibleRegimenColumns">
+            <ng-switch on="regimenColumn.label">
+              <div ng-switch-when="header.name">
+                <div class="regimen-heading" openlmis-message="header.name"></div>
+              </div>
+              <div class="regimen-heading" ng-switch-when="header.code">
+                <span openlmis-message="header.code"></span>
+              </div>
+              <div class="regimen-heading" ng-switch-default>
+                <span ng-bind="regimenColumn.label"/>
+              </div>
+            </ng-switch>
+          </th>
+        </tr>
+        </thead>
+        <tbody ng-repeat="regimenLineItem in pageLineItems">
+        <tr>
+          <td class="productCategory" colspan="{{visibleRegimenColumns.length}}" ng-show="showCategory($index)"
+              ng-bind="regimenLineItem.category.name"></td>
+        </tr>
+        <tr>
+          <td class="cell-input" ng-repeat="regimenColumn in visibleRegimenColumns">
+            <ng-switch on="regimenColumn.name">
               <span ng-switch-when="name">
                 <span ng-bind="regimenLineItem.name" class="cell-text"></span>
               </span>
@@ -54,10 +57,12 @@
                       style="display:none;" openlmis-message="error.number.only">
               </span>
               </span>
-          </ng-switch>
-        </td>
-      </tr>
-      </tbody>
-    </table>
-  </div>
+            </ng-switch>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+    <ng-include src="'/public/pages/logistics/rnr/partials/controls.html'"></ng-include>
+  </form>
 </div>

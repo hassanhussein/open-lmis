@@ -1,0 +1,28 @@
+<!--
+  ~ Copyright © 2013 VillageReach.  All Rights Reserved.  This Source Code Form is subject to the terms of the Mozilla Public License, v. 2.0.
+  ~
+  ~ If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+  -->
+
+<div class="rnr-tabs clearfix">
+  <ul class="clearfix">
+    <li
+      ng-class="{'selected': (visibleTab == 'full-supply'), 'has-error': fullSupplyTabError}">
+      <a href="" ng-click="switchSupplyType('full-supply')" id="fullSupplyTab"
+         openlmis-message="label.full.supply.products"></a></li>
+    <li ng-class="{'selected': visibleTab == 'non-full-supply', 'has-error': nonFullSupplyTabError}">
+      <a href="" ng-click="switchSupplyType('non-full-supply')" id="nonFullSupplyTab"
+         openlmis-message="label.non.full.supply.products"></a></li>
+    <li ng-class="{'selected': visibleTab == 'regimen', 'has-error': regimenLineItemInValid}" ng-show="regimenCount">
+      <a href="" ng-click="switchSupplyType('regimen')" id="regimenTab" openlmis-message="label.regimens"></a></li>
+  </ul>
+    <span class="pull-right">
+      <a href="" class="btn" ng-click="fullScreen = !fullScreen">
+        <i ng-class="{'icon-resize-full': !fullScreen, 'icon-resize-small': fullScreen}"></i>
+      </a>
+    </span>
+    <span class="pull-right print-button">
+      <a class="btn btn-primary" ng-href="/requisitions/{{rnr.id}}/print.pdf" ng-show="fullScreen"
+         openlmis-message="button.print" target="_blank"></a>
+    </span>
+</div>
