@@ -80,9 +80,9 @@ rnrModule.service('RequisitionService', function ($rootScope, $q, $route, Requis
     var self = this;
 
     if (self.initialized) return this.data;
+    promises.push(rnrColumns($q, ProgramRnRColumnList, $route));
     promises.push(requisition($q, Requisitions, $route));
     promises.push(currency($q, ReferenceData));
-    promises.push(rnrColumns($q, ProgramRnRColumnList, $route));
     promises.push(lossesAndAdjustmentsTypes($q, LossesAndAdjustmentsReferenceData));
     promises.push(facilityApprovedProducts($q, $route, FacilityApprovedProducts));
     promises.push(requisitionRights($q, $route, FacilityProgramRights));
@@ -94,6 +94,8 @@ rnrModule.service('RequisitionService', function ($rootScope, $q, $route, Requis
       _.each(values, function (value) {
         data[value.key] = value.response;
       });
+
+      data['requisition'] = new Rnr(data['requisition'], data['rnrColumnList']);
 
       $rootScope.$broadcast('rnrInitialized', data);
       self.data = data;
@@ -390,8 +392,7 @@ rnrModule.service('RequisitionService', function ($rootScope, $q, $route, Requis
 
   this.prepareRnr = function (scope) {
 
-    function resetCostsIfNull() {
-      var rnr = scope.rnr;
+    function resetCostsIfNull(rnr) {
       if (rnr == null) return;
       if (!rnr.fullSupplyItemsSubmittedCost)
         rnr.fullSupplyItemsSubmittedCost = 0;
@@ -399,11 +400,7 @@ rnrModule.service('RequisitionService', function ($rootScope, $q, $route, Requis
         rnr.nonFullSupplyItemsSubmittedCost = 0;
     }
 
-    var rnr = scope.rnr;
-    //TODO stop multiple wrapping of rnr
-    scope.rnr = new Rnr(rnr, scope.programRnrColumnList);
-
-    resetCostsIfNull();
+    resetCostsIfNull(scope.rnr);
     scope.fillPagedGridData();
     scope.formDisabled = (function () {
       if (scope.rnr) {
