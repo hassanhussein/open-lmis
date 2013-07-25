@@ -39,7 +39,6 @@ function CreateRegimenLineItemController($scope, $location, $routeParams, $dialo
       return !((index > 0 ) && ($scope.rnr.regimenLineItems[index].category.name == $scope.rnr.regimenLineItems[index - 1].category.name));
     };
 
-    $scope.currentPage = ($routeParams.page) ? parseInt($routeParams.page) || 1 : 1;
   }
 
 

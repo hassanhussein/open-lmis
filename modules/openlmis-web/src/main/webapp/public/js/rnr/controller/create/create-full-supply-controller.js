@@ -115,8 +115,6 @@ function CreateFullSupplyController($scope, $location, $dialog, RequisitionServi
       $scope.error = "error.rnr.template.not.defined";
       $location.path("/init-rnr");
     }
-
-    $scope.currentPage = ($routeParams.page) ? parseInt($routeParams.page) || 1 : 1;
   }
 
 

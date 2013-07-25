@@ -198,6 +198,7 @@ rnrModule.service('RequisitionService', function ($rootScope, $q, $route, Requis
     var self = this;
 
     scope.fullScreen = false;
+    scope.currentPage = (routeParams.page) ? parseInt(routeParams.page) || 1 : 1;
 
     var resetErrorPages = function (scope) {
       scope.errorPages = {fullSupply: [], nonFullSupply: []};

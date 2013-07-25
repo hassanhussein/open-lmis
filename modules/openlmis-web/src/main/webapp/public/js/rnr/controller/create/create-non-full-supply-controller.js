@@ -192,8 +192,6 @@ function CreateNonFullSupplyController($scope, $location, $dialog, RequisitionSe
       $location.path("/init-rnr");
     }
 
-    $scope.currentPage = ($routeParams.page) ? parseInt($routeParams.page) || 1 : 1;
-
     $scope.visibleNonFullSupplyColumns = _.filter($scope.visibleColumns, function (column) {
       return _.contains(RnrLineItem.visibleForNonFullSupplyColumns, column.name);
     });
