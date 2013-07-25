@@ -8,7 +8,9 @@ package org.openlmis.functional;
 
 
 import com.thoughtworks.selenium.SeleneseTestNgHelper;
+import cucumber.api.DataTable;
 import cucumber.api.java.Before;
+import cucumber.api.java.en.And;
 import cucumber.api.java.en.Given;
 import cucumber.api.java.en.Then;
 import cucumber.api.java.en.When;
@@ -25,6 +27,7 @@ import org.testng.annotations.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static com.thoughtworks.selenium.SeleneseTestBase.assertEquals;
 
@@ -67,37 +70,44 @@ public class ViewWarehouseLoadAmount extends TestCaseHelper {
     rightsList.add("MANAGE_DISTRIBUTION");
     setupTestDataToInitiateRnRAndDistribution(facilityCodeFirst, facilityCodeSecond, true,
       programFirst, userSIC, "200", "openLmis", rightsList, programSecond, district1, district1, parentGeoZone);
-    setupDataForDeliveryZone(deliveryZoneCodeFirst, deliveryZoneCodeSecond,
-      deliveryZoneNameFirst, deliveryZoneNameSecond,
-      facilityCodeFirst, facilityCodeSecond,
-      programFirst, programSecond, schedule);
-
-    dbWrapper.insertRoleAssignmentForDistribution(userSIC, "store in-charge", deliveryZoneCodeFirst);
-    dbWrapper.insertRoleAssignmentForDistribution(userSIC, "store in-charge", deliveryZoneCodeSecond);
-    dbWrapper.insertProgramProductISA(programFirst, product, "10", "10", "10", "10", null, null, "0");
-    dbWrapper.InsertOverridenIsa(facilityCodeFirst, programFirst, product2, 1000);
-  }
-
-  @Given("^I have data available for multiple facilities in a delivery zone for distribution load amount$")
-  public void setupDataForDistributionLoadAmountHavingMultipleFacilitiesAttachedWithSingleDeliveryZone() throws Exception {
-    List<String> rightsList = new ArrayList<String>();
-    rightsList.add("MANAGE_DISTRIBUTION");
-    setupTestDataToInitiateRnRAndDistribution(facilityCodeFirst, facilityCodeSecond, true, programFirst,
-      userSIC, "200", "openLmis", rightsList, programSecond, district1, district1, parentGeoZone);
-
-    setupDataForDeliveryZoneForMultipleFacilitiesAttachedWithSingleDeliveryZone(deliveryZoneCodeFirst,
-      deliveryZoneNameFirst,
-      facilityCodeFirst, facilityCodeSecond,
-      programFirst, programSecond, schedule);
-
-    dbWrapper.insertRoleAssignmentForDistribution(userSIC, "store in-charge", deliveryZoneCodeFirst);
-    dbWrapper.insertRoleAssignmentForDistribution(userSIC, "store in-charge", deliveryZoneCodeSecond);
-    dbWrapper.InsertOverridenIsa(facilityCodeFirst, programFirst, product, 1000);
-    dbWrapper.InsertOverridenIsa(facilityCodeFirst, programFirst, product2, 2000);
-    dbWrapper.InsertOverridenIsa(facilityCodeSecond, programFirst, product, 3000);
-    dbWrapper.InsertOverridenIsa(facilityCodeSecond, programFirst, product2, 4000);
 
   }
+
+  @And("^I have data available for \"([^\"]*)\" (facility|facilities) attached to delivery zones$")
+  public void setupDataForMultipleDeliveryZones(String facilityInstances,String facility) throws Exception {
+    if (facilityInstances.equalsIgnoreCase("Multiple")) {
+      setupDataForDeliveryZone(true, deliveryZoneCodeFirst, deliveryZoneCodeSecond,
+        deliveryZoneNameFirst, deliveryZoneNameSecond,
+        facilityCodeFirst, facilityCodeSecond,
+        programFirst, programSecond, schedule);
+    } else if (facilityInstances.equalsIgnoreCase("Single")) {
+      setupDataForDeliveryZone(false, deliveryZoneCodeFirst, deliveryZoneCodeSecond,
+        deliveryZoneNameFirst, deliveryZoneNameSecond,
+        facilityCodeFirst, facilityCodeSecond,
+        programFirst, programSecond, schedule);
+    }
+      }
+
+    @And("^I have role assigned to delivery zones$")
+    public void setupRoleAssignmentForMultipleDeliveryZones() throws Exception {
+        dbWrapper.insertRoleAssignmentForDistribution(userSIC, "store in-charge", deliveryZoneCodeFirst);
+        dbWrapper.insertRoleAssignmentForDistribution(userSIC, "store in-charge", deliveryZoneCodeSecond);
+    }
+    @And("^I have following ISA values:$")
+    public void setProgramProductISA(DataTable tableData) throws Exception {
+        List<Map<String, String>> data = tableData.asMaps();
+        for (Map map : data) {
+            dbWrapper.insertProgramProductISA(map.get("Program").toString(), map.get("Product").toString(),map.get("whoratio").toString(),map.get("dosesperyear").toString(),map.get("wastageFactor").toString(),map.get("bufferpercentage").toString(),map.get("minimumvalue").toString(),map.get("maximumvalue").toString(),map.get("adjustmentvalue").toString());
+        }
+    }
+
+    @And("^I have following override ISA values:$")
+    public void setOverrideISA(DataTable tableData) throws Exception {
+        List<Map<String, String>> data = tableData.asMaps();
+        for (Map map : data) {
+            dbWrapper.InsertOverridenIsa(map.get("Facility Code").toString(), map.get("Program").toString(),map.get("Product").toString(),Integer.parseInt(map.get("ISA").toString()));
+        }
+    }
 
   @When("^I click load amount$")
   public void clickDistributionLoadAmount() throws Exception {
@@ -130,12 +140,12 @@ public class ViewWarehouseLoadAmount extends TestCaseHelper {
   @Then("^I should see ISA values as per delivery zone facilities$")
   public void verifyISAAndOverrideISA() throws Exception {
     WarehouseLoadAmountPage warehouseLoadAmountPage = new WarehouseLoadAmountPage(testWebDriver);
-    assertEquals(facilityCodeFirst, warehouseLoadAmountPage.getFacilityCode(1, 1));
-    assertEquals(dbWrapper.getFacilityName(facilityCodeFirst), warehouseLoadAmountPage.getFacilityName(1, 1));
-    assertEquals(dbWrapper.getFacilityPopulation(facilityCodeFirst), warehouseLoadAmountPage.getFacilityPopulation(1, 1));
+    assertEquals(facilityCodeSecond, warehouseLoadAmountPage.getFacilityCode(1, 1));
+    assertEquals(dbWrapper.getFacilityName(facilityCodeSecond), warehouseLoadAmountPage.getFacilityName(1, 1));
+    assertEquals(dbWrapper.getFacilityPopulation(facilityCodeSecond), warehouseLoadAmountPage.getFacilityPopulation(1, 1));
 
     assertEquals(IsaProgramProduct(programFirst, product, warehouseLoadAmountPage.getFacilityPopulation(1, 1)), warehouseLoadAmountPage.getProduct1Isa(1, 1));
-    assertEquals(dbWrapper.getOverridenIsa(facilityCodeFirst, programFirst, product2), warehouseLoadAmountPage.getProduct2Isa(1, 1));
+    assertEquals(dbWrapper.getOverridenIsa(facilityCodeSecond, programFirst, product2), warehouseLoadAmountPage.getProduct2Isa(1, 1));
 
   }
 
@@ -156,10 +166,10 @@ public class ViewWarehouseLoadAmount extends TestCaseHelper {
     setupTestDataToInitiateRnRAndDistribution(facilityCodeFirst, facilityCodeSecond, true, programFirst,
       userSIC, "200", "openLmis", rightsList, programSecond, district1, district1, parentGeoZone1);
 
-    setupDataForDeliveryZoneForMultipleFacilitiesAttachedWithSingleDeliveryZone(deliveryZoneCodeFirst,
-      deliveryZoneNameFirst,
-      facilityCodeFirst, facilityCodeSecond,
-      programFirst, programSecond, schedule);
+    setupDataForDeliveryZone(false, deliveryZoneCodeFirst, deliveryZoneCodeSecond,
+            deliveryZoneNameFirst, deliveryZoneNameSecond,
+            facilityCodeFirst, facilityCodeSecond,
+            programFirst, programSecond, schedule);
 
     addOnDataSetupForDeliveryZoneForMultipleFacilitiesAttachedWithSingleDeliveryZone(deliveryZoneCodeFirst,
       facilityCodeThird, facilityCodeFourth, district2, district2, parentGeoZone);
@@ -220,10 +230,10 @@ public class ViewWarehouseLoadAmount extends TestCaseHelper {
     List<String> rightsList = new ArrayList<String>();
     rightsList.add("MANAGE_DISTRIBUTION");
     setupTestDataToInitiateRnRAndDistribution(facilityCodeFirst, facilityCodeSecond, true, programFirst, userSIC, "200", "openLmis", rightsList, programSecond, district1, parentGeoZone, parentGeoZone);
-    setupDataForDeliveryZoneForMultipleFacilitiesAttachedWithSingleDeliveryZone(deliveryZoneCodeFirst,
-      deliveryZoneNameFirst,
-      facilityCodeFirst, facilityCodeSecond,
-      programFirst, programSecond, schedule);
+    setupDataForDeliveryZone(false, deliveryZoneCodeFirst, deliveryZoneCodeSecond,
+            deliveryZoneNameFirst, deliveryZoneNameSecond,
+            facilityCodeFirst, facilityCodeSecond,
+            programFirst, programSecond, schedule);
 
     dbWrapper.insertRoleAssignmentForDistribution(userSIC, "store in-charge", deliveryZoneCodeFirst);
     dbWrapper.insertRoleAssignmentForDistribution(userSIC, "store in-charge", deliveryZoneCodeSecond);
@@ -295,9 +305,9 @@ public class ViewWarehouseLoadAmount extends TestCaseHelper {
   @AfterMethod(groups = "functional2")
   public void tearDown() throws Exception {
     testWebDriver.sleep(500);
-    if(!testWebDriver.getElementById("username").isDisplayed()) {
-    HomePage homePage = new HomePage(testWebDriver);
-    homePage.logout(baseUrlGlobal);
+    if (!testWebDriver.getElementById("username").isDisplayed()) {
+      HomePage homePage = new HomePage(testWebDriver);
+      homePage.logout(baseUrlGlobal);
     }
     dbWrapper.deleteData();
     dbWrapper.closeConnection();

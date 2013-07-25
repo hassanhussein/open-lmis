@@ -318,11 +318,6 @@ public class Rnr extends BaseModel {
 
   public void setAuditFieldsForRequisition(Long modifiedBy, RnrStatus status) {
     this.status = status;
-    Date operationDate = new Date();
-
-    if (status.equals(SUBMITTED)) setSubmittedDate(operationDate);
-    if (status.equals(AUTHORIZED)) setAuthorizedDate(operationDate);
-
     this.modifiedBy = modifiedBy;
   }
 

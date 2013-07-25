@@ -12,10 +12,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.remote.UnreachableBrowserException;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.math.BigDecimal;
 import java.net.CookieManager;
 import java.sql.SQLException;
@@ -80,7 +77,7 @@ public class TestCaseHelper {
   }
 
 
-  protected void loadDriver(String browser) throws InterruptedException {
+  protected void loadDriver(String browser) throws InterruptedException, IOException {
 
     testWebDriver = new TestWebDriver(driverFactory.loadDriver(browser));
   }
@@ -194,30 +191,24 @@ public class TestCaseHelper {
     setupTestDataToApproveRnR("commTrack1", "701", "commTrack", rightsList);
   }
 
-  public void setupDataForDeliveryZone(String deliveryZoneCodeFirst, String deliveryZoneCodeSecond,
+  public void setupDataForDeliveryZone(boolean multipleFacilityInstances, String deliveryZoneCodeFirst, String deliveryZoneCodeSecond,
                                        String deliveryZoneNameFirst, String deliveryZoneNameSecond,
                                        String facilityCodeFirst, String facilityCodeSecond,
                                        String programFirst, String programSecond, String schedule) throws IOException, SQLException {
     dbWrapper.insertDeliveryZone(deliveryZoneCodeFirst, deliveryZoneNameFirst);
+    if(multipleFacilityInstances)
     dbWrapper.insertDeliveryZone(deliveryZoneCodeSecond, deliveryZoneNameSecond);
     dbWrapper.insertDeliveryZoneMembers(deliveryZoneCodeFirst, facilityCodeFirst);
+    dbWrapper.insertDeliveryZoneMembers(deliveryZoneCodeFirst, facilityCodeSecond);
+    if(multipleFacilityInstances)
     dbWrapper.insertDeliveryZoneMembers(deliveryZoneCodeSecond, facilityCodeSecond);
     dbWrapper.insertProcessingPeriodForDistribution(14, schedule);
     dbWrapper.insertDeliveryZoneProgramSchedule(deliveryZoneCodeFirst, programFirst, schedule);
+    dbWrapper.insertDeliveryZoneProgramSchedule(deliveryZoneCodeFirst, programSecond, schedule);
+    if(multipleFacilityInstances)
     dbWrapper.insertDeliveryZoneProgramSchedule(deliveryZoneCodeSecond, programSecond, schedule);
   }
 
-  public void setupDataForDeliveryZoneForMultipleFacilitiesAttachedWithSingleDeliveryZone(String deliveryZoneCodeFirst,
-                                       String deliveryZoneNameFirst,
-                                       String facilityCodeFirst, String facilityCodeSecond,
-                                       String programFirst, String programSecond, String schedule) throws IOException, SQLException {
-    dbWrapper.insertDeliveryZone(deliveryZoneCodeFirst, deliveryZoneNameFirst);
-    dbWrapper.insertDeliveryZoneMembers(deliveryZoneCodeFirst, facilityCodeFirst);
-    dbWrapper.insertDeliveryZoneMembers(deliveryZoneCodeFirst, facilityCodeSecond);
-    dbWrapper.insertProcessingPeriodForDistribution(14, schedule);
-    dbWrapper.insertDeliveryZoneProgramSchedule(deliveryZoneCodeFirst, programFirst, schedule);
-    dbWrapper.insertDeliveryZoneProgramSchedule(deliveryZoneCodeFirst, programSecond, schedule);
-  }
 
   public void addOnDataSetupForDeliveryZoneForMultipleFacilitiesAttachedWithSingleDeliveryZone(String deliveryZoneCodeFirst,
                                                                                                String facilityCodeThird,
@@ -301,18 +292,7 @@ public class TestCaseHelper {
         dbWrapper.insertFacilities(facilityCodeFirst, facilityCodeSecond);
         dbWrapper.insertSchedule(schedule, "Monthly", "Month");
         setupTestRoleRightsData(roleNmae,"ALLOCATION","MANAGE_DISTRIBUTION");
-        setupDataForDeliveryZone(deliveryZoneCodeFirst, deliveryZoneCodeSecond, deliveryZoneNameFirst, deliveryZoneNameSecond,facilityCodeFirst, facilityCodeSecond, programFirst, programSecond, schedule);
-    }
-    public void UpdateProperty(String propertyFilePath, String property, String value) throws IOException {
-        FileInputStream in = new FileInputStream(propertyFilePath);
-        Properties props = new Properties();
-        props.load(in);
-        in.close();
-
-        FileOutputStream out = new FileOutputStream(propertyFilePath);
-        props.setProperty(property, value);
-        props.store(out, null);
-        out.close();
+        setupDataForDeliveryZone(true,deliveryZoneCodeFirst, deliveryZoneCodeSecond, deliveryZoneNameFirst, deliveryZoneNameSecond,facilityCodeFirst, facilityCodeSecond, programFirst, programSecond, schedule);
     }
 
     public void OpenIndexedDB(String dbName)

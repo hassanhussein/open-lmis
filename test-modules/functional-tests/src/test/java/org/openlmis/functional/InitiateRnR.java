@@ -95,6 +95,7 @@ public class InitiateRnR extends TestCaseHelper {
     HomePage homePage = new HomePage(testWebDriver);
     homePage.navigateAndInitiateRnr(program);
     initiateRnRPage = homePage.clickProceed();
+    testWebDriver.sleep(2000);
   }
 
   @When("^I populate RnR data$")
@@ -153,12 +154,15 @@ public class InitiateRnR extends TestCaseHelper {
   public void clickSubmit()
   {
     initiateRnRPage.clickSubmitButton();
+    testWebDriver.sleep(250);
   }
 
   @When("^I click ok$")
   public void clickOk()
   {
+    testWebDriver.sleep(250);
     initiateRnRPage.clickOk();
+
   }
 
   @When("^I should see submit successfully$")
