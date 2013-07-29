@@ -5,9 +5,8 @@
  */
 
 function CreateFullSupplyController($scope, $location, $dialog, RequisitionService, $routeParams, messageService) {
+  console.log("create full supply controller invoked");
   $scope.visibleTab = "full-supply";
-  $scope.baseUrl = "/edit/full-supply/" + $routeParams.rnr + '/' + $routeParams.facility + '/' + $routeParams.program;
-
   $scope.currentRnrLineItem = undefined;
 
   $scope.getId = function (prefix, parent) {
@@ -89,6 +88,7 @@ function CreateFullSupplyController($scope, $location, $dialog, RequisitionServi
 
 
   $scope.$on('rnrInitialized', function (event, data) {
+    console.log("rnr initialized event captured in non full supply controller");
     initController(data);
   });
 
@@ -97,13 +97,11 @@ function CreateFullSupplyController($scope, $location, $dialog, RequisitionServi
     $scope.pageSize = data.pageSize;
     $scope.rnr = data.requisition;
     $scope.allTypes = data.lossesAndAdjustmentsTypes;
-    $scope.facilityApprovedProducts = data.facilityApprovedProducts;
     $scope.visibleColumns = _.where(data.rnrColumnList, {'visible': true});
     $scope.programRnrColumnList = data.rnrColumnList;
     $scope.requisitionRights = data.requisitionRights;
     $scope.regimenColumns = data.regimenTemplate ? data.regimenTemplate.columns : [];
     $scope.visibleRegimenColumns = _.where($scope.regimenColumns, {'visible': true});
-    $scope.addNonFullSupplyLineItemButtonShown = _.findWhere($scope.programRnrColumnList, {'name': 'quantityRequested'});
     $scope.regimenCount = $scope.rnr.regimenLineItems.length;
     $scope.currency = data.currency;
 

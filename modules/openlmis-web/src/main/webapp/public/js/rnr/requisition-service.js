@@ -79,7 +79,12 @@ rnrModule.service('RequisitionService', function ($rootScope, $q, $route, Requis
   this.initialize = function () {
     var self = this;
 
-    if (self.initialized) return this.data;
+    if (self.initialized) {
+      console.log("requisition service already initialized");
+      return this.data;
+    }
+    console.log("requisition service initializing");
+
     promises.push(rnrColumns($q, ProgramRnRColumnList, $route));
     promises.push(requisition($q, Requisitions, $route));
     promises.push(currency($q, ReferenceData));
@@ -211,6 +216,7 @@ rnrModule.service('RequisitionService', function ($rootScope, $q, $route, Requis
 
 
   this.stuffScope = function (scope, location, routeParams, dialog) {
+    console.log("stuffing scope in service initializing");
     var self = this;
 
     scope.fullScreen = false;
@@ -223,7 +229,7 @@ rnrModule.service('RequisitionService', function ($rootScope, $q, $route, Requis
     resetErrorPages(scope);
 
     scope.$on('routeUpdate', function () {
-      console.log("full supply routeUpdate");
+      console.log("routeUpdate event captured");
       if (!utils.isValidPage(page, scope.numberOfPages)) {
         location.search('page', 1);
       }

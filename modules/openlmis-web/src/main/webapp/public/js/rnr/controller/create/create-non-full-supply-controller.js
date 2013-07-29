@@ -6,7 +6,7 @@
 
 function CreateNonFullSupplyController($scope, $location, $dialog, RequisitionService, $routeParams, messageService) {
 
-  console.log("controller invoked");
+  console.log("create non full supply controller invoked");
   $scope.visibleTab = "non-full-supply";
 
   $scope.getId = function (prefix, parent) {
@@ -143,29 +143,15 @@ function CreateNonFullSupplyController($scope, $location, $dialog, RequisitionSe
     return messageService.get('msg.no.matches.found');
   };
 
-  //-------------------//////////////
-
-  RequisitionService.stuffScope($scope, $location, $routeParams, $dialog);
-
-
-  //-------------------------------
-
-
-  $scope.baseUrl = "/edit/non-full-supply/" + $routeParams.rnr + '/' + $routeParams.facility + '/' + $routeParams.program;
-
-  RequisitionService.initialize();
-
   $scope.$on('rnrInitialized', function (event, data) {
-    console.log("service initialized");
+    console.log("rnr initialized event captured in non full supply controller");
     initController(data);
   });
 
   function initController(data) {
     $scope.pageSize = data.pageSize;
     $scope.rnr = data.requisition;
-    $scope.allTypes = data.lossesAndAdjustmentsTypes;
     $scope.facilityApprovedProducts = data.facilityApprovedProducts;
-    $scope.visibleColumns = _.where(data.rnrColumnList, {'visible': true});
     $scope.programRnrColumnList = data.rnrColumnList;
     $scope.requisitionRights = data.requisitionRights;
     $scope.regimenColumns = data.regimenTemplate ? data.regimenTemplate.columns : [];
@@ -181,8 +167,8 @@ function CreateNonFullSupplyController($scope, $location, $dialog, RequisitionSe
       $location.path("/init-rnr");
     }
 
-    $scope.visibleNonFullSupplyColumns = _.filter($scope.visibleColumns, function (column) {
-      return _.contains(RnrLineItem.visibleForNonFullSupplyColumns, column.name);
+    $scope.visibleNonFullSupplyColumns = _.filter(data.rnrColumnList, function (column) {
+      return _.contains(RnrLineItem.visibleForNonFullSupplyColumns, column.name) && column.visible == true;
     });
 
     var map = _.map($scope.facilityApprovedProducts, function (facilitySupportedProduct) {
@@ -196,8 +182,10 @@ function CreateNonFullSupplyController($scope, $location, $dialog, RequisitionSe
   }
 
   var data = RequisitionService.initialize();
-  if (data) initController(data);
+  if (data) {
+    initController(data);
+  }
+  RequisitionService.stuffScope($scope, $location, $routeParams, $dialog);
+
   $scope.message = RequisitionService.message;
 }
-
-
