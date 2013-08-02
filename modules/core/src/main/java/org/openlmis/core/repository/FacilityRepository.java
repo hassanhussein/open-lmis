@@ -43,7 +43,7 @@ public class FacilityRepository {
 
   public void save(Facility facility) {
     try {
-      validateAndSetFacilityOperator(facility);
+      validateAndSetFacilityOperatedBy(facility);
       validateAndSetFacilityType(facility);
       validateGeographicZone(facility);
       if (facility.getId() == null) {
@@ -93,7 +93,7 @@ public class FacilityRepository {
 
   }
 
-  private void validateAndSetFacilityOperator(Facility facility) {
+  private void validateAndSetFacilityOperatedBy(Facility facility) {
     if (facility.getOperatedBy() == null) return;
 
     String operatedByCode = facility.getOperatedBy().getCode();

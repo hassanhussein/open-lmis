@@ -6,6 +6,16 @@
 
 function RecordFacilityDataController(IndexedDB, $scope, $route) {
 
+  $scope.format = function(facility) {
+    if(facility.id) {
+      return "<div class='is-empty'>" +
+                "<span class='status-icon'></span>" + facility.text +
+              "</div>";
+    } else {
+      return facility.text;
+    }
+  }
+
   function fetchReferenceData() {
     var zpp = $route.current.params.zpp;
     var connection = IndexedDB.getConnection();
@@ -26,9 +36,14 @@ function RecordFacilityDataController(IndexedDB, $scope, $route) {
     }
   }
 
-  $scope.$on('indexedDBReady', function () {
+  if (IndexedDB.getConnection() == null) {
+    $scope.$on('indexedDBReady', function () {
+      fetchReferenceData();
+    });
+  } else {
     fetchReferenceData();
-  })
+  }
+
 };
 
 
