@@ -7,21 +7,21 @@
 //  Description:
 //  Pagination
 
-app.directive('openlmisPagination',function () {
+app.directive('openlmisPagination', function ($location) {
   return {
-    restrict:'EA',
-    scope:{
-      numPages:'=',
-      currentPage:'=',
-      maxSize:'=',
-      onSelectPage:'&',
-      nextText:'@',
-      previousText:'@',
-      checkErrorOnPage:'&'
+    restrict: 'EA',
+    scope: {
+      numPages: '=',
+      currentPage: '=',
+      maxSize: '=',
+      onSelectPage: '&',
+      nextText: '@',
+      previousText: '@',
+      checkErrorOnPage: '&'
     },
-    templateUrl:'/public/pages/template/pagination/pagination.html',
-    replace:true,
-    link:function (scope) {
+    templateUrl: '/public/pages/template/pagination/pagination.html',
+    replace: true,
+    link: function (scope) {
       scope.$watch('numPages + currentPage + maxSize', function () {
         scope.pages = [];
         var maxSize = ( scope.maxSize && scope.maxSize < scope.numPages ) ? scope.maxSize : scope.numPages;
@@ -39,6 +39,13 @@ app.directive('openlmisPagination',function () {
           scope.selectPage(scope.numPages);
         }
       });
+
+      scope.$watch("currentPage", function (newVal, oldVal) {
+        console.log("page changed from " + oldVal + " to " + newVal);
+        $location.search("page", newVal);
+      });
+
+
       scope.noPrevious = function () {
         return scope.currentPage === 1;
       };
@@ -52,7 +59,7 @@ app.directive('openlmisPagination',function () {
       scope.selectPage = function (page) {
         if (!scope.isActive(page)) {
           scope.currentPage = page;
-          scope.onSelectPage({ page:page });
+          scope.onSelectPage({ page: page });
         }
       };
 
@@ -68,7 +75,7 @@ app.directive('openlmisPagination',function () {
       };
 
       scope.hasErrorOnPage = function (page) {
-        return scope.checkErrorOnPage({page:page});
+        return scope.checkErrorOnPage({page: page});
       };
 
     }

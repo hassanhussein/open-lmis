@@ -228,9 +228,9 @@ rnrModule.service('RequisitionService', function ($rootScope, $q, $route, Requis
 
     resetErrorPages(scope);
 
-    scope.$on('routeUpdate', function () {
-      console.log("routeUpdate event captured");
-      if (!utils.isValidPage(page, scope.numberOfPages)) {
+    scope.$on('$routeUpdate', function () {
+      console.log("$routeUpdate event captured");
+      if (!utils.isValidPage(scope.currentPage, scope.numberOfPages)) {
         location.search('page', 1);
       }
 
@@ -273,11 +273,6 @@ rnrModule.service('RequisitionService', function ($rootScope, $q, $route, Requis
       angular.element(event.target).parents(".dropdown").click();
       location.search('page', page);
     };
-
-
-    scope.$watch("currentPage", function () {
-      location.search("page", scope.currentPage);
-    });
 
 
     scope.highlightRequired = function (value) {
